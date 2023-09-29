@@ -1,0 +1,72 @@
+[
+    [
+        "0",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "1",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 1
+        }
+    ],
+    [
+        "2",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 1
+        }
+    ],
+    [
+        "3",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "4",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "5",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "6",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "7",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "8",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "9",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ]
+]

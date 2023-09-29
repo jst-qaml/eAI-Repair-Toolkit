@@ -1,0 +1,548 @@
+[
+  {
+    "name": "0.jpg",
+    "attributes": {
+      "timeofday": "morning"
+    },
+    "labels": [
+      {
+        "id": "0",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "bicycle",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "1.jpg",
+    "attributes": {
+      "timeofday": "night"
+    },
+    "labels": [
+      {
+        "id": "1",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "bus",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "2.jpg",
+    "attributes": {
+      "timeofday": "morning"
+    },
+    "labels": [
+      {
+        "id": "2",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "car",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "3.jpg",
+    "attributes": {
+      "timeofday": "night"
+    },
+    "labels": [
+      {
+        "id": "3",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "motorcycle",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "4.jpg",
+    "attributes": {
+      "timeofday": "morning"
+    },
+    "labels": [
+      {
+        "id": "4",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "other person",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "5.jpg",
+    "attributes": {
+      "timeofday": "night"
+    },
+    "labels": [
+      {
+        "id": "5",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "other vehicle",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "6.jpg",
+    "attributes": {
+      "timeofday": "morning"
+    },
+    "labels": [
+      {
+        "id": "6",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "pedestrian",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "7.jpg",
+    "attributes": {
+      "timeofday": "night"
+    },
+    "labels": [
+      {
+        "id": "7",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "rider",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "8.jpg",
+    "attributes": {
+      "timeofday": "morning"
+    },
+    "labels": [
+      {
+        "id": "8",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "traffic light",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "9.jpg",
+    "attributes": {
+      "timeofday": "night"
+    },
+    "labels": [
+      {
+        "id": "9",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "traffic sign",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "10.jpg",
+    "attributes": {
+      "timeofday": "morning"
+    },
+    "labels": [
+      {
+        "id": "10",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "trailer",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "11.jpg",
+    "attributes": {
+      "timeofday": "night"
+    },
+    "labels": [
+      {
+        "id": "11",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "train",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "12.jpg",
+    "attributes": {
+      "timeofday": "morning"
+    },
+    "labels": [
+      {
+        "id": "12",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "truck",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "13.jpg",
+    "attributes": {
+      "timeofday": "night"
+    },
+    "labels": [
+      {
+        "id": "13",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "bicycle",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "14.jpg",
+    "attributes": {
+      "timeofday": "morning"
+    },
+    "labels": [
+      {
+        "id": "14",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "bus",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "15.jpg",
+    "attributes": {
+      "timeofday": "night"
+    },
+    "labels": [
+      {
+        "id": "15",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "car",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "16.jpg",
+    "attributes": {
+      "timeofday": "morning"
+    },
+    "labels": [
+      {
+        "id": "16",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "motorcycle",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "17.jpg",
+    "attributes": {
+      "timeofday": "night"
+    },
+    "labels": [
+      {
+        "id": "17",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "other person",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "18.jpg",
+    "attributes": {
+      "timeofday": "morning"
+    },
+    "labels": [
+      {
+        "id": "18",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "other vehicle",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "19.jpg",
+    "attributes": {
+      "timeofday": "night"
+    },
+    "labels": [
+      {
+        "id": "19",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "pedestrian",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "20.jpg",
+    "attributes": {
+      "timeofday": "morning"
+    },
+    "labels": [
+      {
+        "id": "20",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "rider",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "21.jpg",
+    "attributes": {
+      "timeofday": "night"
+    },
+    "labels": [
+      {
+        "id": "21",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "traffic light",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "22.jpg",
+    "attributes": {
+      "timeofday": "morning"
+    },
+    "labels": [
+      {
+        "id": "22",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "traffic sign",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "23.jpg",
+    "attributes": {
+      "timeofday": "night"
+    },
+    "labels": [
+      {
+        "id": "23",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "trailer",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "24.jpg",
+    "attributes": {
+      "timeofday": "morning"
+    },
+    "labels": [
+      {
+        "id": "24",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "train",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  },
+  {
+    "name": "25.jpg",
+    "attributes": {
+      "timeofday": "night"
+    },
+    "labels": [
+      {
+        "id": "25",
+        "attributes": {
+          "key": "value"
+        },
+        "category": "truck",
+        "box2d": {
+          "x1": 10,
+          "y1": 10,
+          "x2": 90,
+          "y2": 90
+        }
+      }
+    ]
+  }
+]
