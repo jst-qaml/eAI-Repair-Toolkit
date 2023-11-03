@@ -1,0 +1,30 @@
+[
+    [
+        "2",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "6",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "7",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "9",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ]
+]

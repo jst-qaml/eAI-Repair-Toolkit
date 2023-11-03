@@ -1,0 +1,37 @@
+[
+    [
+        "0",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "12",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "2",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "8",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "9",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ]
+]

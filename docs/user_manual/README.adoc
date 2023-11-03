@@ -1,0 +1,1508 @@
+:encoding: utf-8
+:lang: ja
+:source-highlighter: rouge
+:author: Udzuki, Inc.
+:revdate: June-7-2023
+:revnumber: v2.6
+:doctype: book
+:version-label:
+:chapter-label:
+:toc:
+:toc-title: Table of Contents
+:figure-caption: Figure
+:table-caption: Table
+:example-caption: Example
+:appendix-caption: Appendix
+:toclevels: 2
+:pagenums:
+:sectnums:
+:imagesdir: images
+:icons: font
+
+= eAI-Repair-Toolkit: User Manual
+
+**Preparation**
+
+* python >= 3.8
+* pip >= 21.3
+
+== Source Code
+
+* Clone from GitHub
+
+[source,bash]
+----
+$ cd ${path/to/workspace}
+$ git clone https://github.com/jst-qaml/eAI-Repair-Toolkit.git
+----
+
+=== Virtual Environment
+
+==== Create
+
+Once only.
+
+[source,bash]
+----
+$ python -m venv <path/to/venv>
+$ source <path/to/venv>/bin/activate
+(venv-name) $ pip install --upgrade pip
+(venv-name) $ pip install -e .
+----
+
+== Dataset
+
+=== The German Traffic Sign Recognition Benchmark (GTSRB)
+
+We use `The German Traffic Sign Recognition Benchmark (GTSRB)` as benchmark for validation of our framework.
+This benchmark can be obtained by the following steps:
+
+* Access https://sid.erda.dk/public/archives/daaeac0d7ce1152aea9b61d9f1e19370/published-archive.html[data-archive site]
+* Download the following items:
+    - `GTSRB_Final_Training_Images.zip`
+    - `GTSRB_Final_Test_Images.zip`
+    - `GTSRB_Final_Test_GT.zip`
+* Unzip the items and move them under `inputs` directory (e.g. `inputs/gtsrb/`)
+
+=== Berkley DeepDrive (BDD)
+
+We use `Berkley DeepDrive (BDD)` as benchmark for validation of our framework.
+This benchmark can be obtained by the following steps:
+
+* Access https://bdd-data.berkeley.edu/[dataset site]
+* Sign up and log in to user page
+* Download the following items:
+    - `bdd100k_images.zip`
+    - `bdd100k_labels_release.zip`
+* Unzip the items and move them under `inputs` directory (e.g. `inputs/bdd/`)
+
+=== Berkley DeepDrive Objects (BDD-Objects)
+
+Subset of BDD. To create this dataset, follow the instructions below.
+
+==== Extract all the object images
+
+To extract all the object images from BDD, execute the following command:
+
+NOTE: The number of extracted images is too large to use for training a model. Therefore, creating a subset in the after step.
+
+[source,bash]
+----
+(venv-name)$ repair create_category_dir --image_dir=inputs/bdd100k/images/100k/train/ --label_file=inputs/bdd100k/labels/det_20/det_train.json
+----
+
+.Options
+|===
+|Option|Description|Default
+
+| `image_dir` |  Path to directory containing raw images of dataset (e.g. inputs/bdd100k/images/100k/train) | `None`
+| `label_file` | Path to label file (e.g. inputs/bdd100k/labels/det_20/det_train.json)| `None`
+| `output_dir` | Path to directory where extracted images are saved | `categories/`
+| `min_area` | Minimum size of images to be extracted |`None` (all the images)
+| `remove_truncated` |Exclude truncated images if you designate `--remove_truncated`|`None`
+| `remove_occluded` |Exclude occluded images if you designate `--remove_occluded`|`None`
+|===
+
+
+==== Create image subset
+
+To create a subset of the object images, execute the following command:
+
+NOTE: The percentage of extracted images will be almost the same as the source images.
+
+----
+(venv-name)$ repair create_image_subset --category_dir=category_dir --output_dir=outputs
+----
+.Options
+|===
+|Option|Description|Default
+| `category_dir` |  Path to directory created by `create_category_dir`. | `None`
+| `output_dir` | Path to directory where extracted images are saved. | `outputs/`
+| `random_state`| The seed value of random sampling for reproducibility of extracting images. |`0`
+| `num` |Minimum number of images to be extracted.|`5000`
+| `category_min` |Minimum number of images to be extracted in each category. |`0`
+| `resize_to` | The length of one side of images to be resized. |`None`
+| `excluded_labels` |Comma seplated labels to be excluded. |`None`
+| `info_file` | Path to a file that is created in this function and stores the arguments to be loaded. The loaded arguments are overwritten if other options are designated. |`None`
+|===
+
+
+===== Example: Create a dataset for eai-repair
+
+A dataset for eai-repair, named `BDD-object` can be created by this module.
+The structure of the dataset is as below.
+
+[source,bash]
+----
+└── bdd_objects
+    ├── train
+    │   └── ... (image files)
+    └── val
+        └── ... (image files)
+----
+
+To create the dataset, execute the following commands:
+
+[source,bash]
+----
+(venv-name)$ mkdir categories outputs
+(venv-name)$ repair create_category_dir --image_dir=inputs/bdd100k/images/100k/train/ --label_file=inputs/bdd100k/labels/det_20/det_train.json  --output_dir=categories/train --min_area=1024
+100%|██████████| 69863/69863 [13:43:53<00:00,  1.41it/s]
+There are no labels in 11ecaf4a-837e3550.jpg
+There are no labels in 272cd572-f7289b9d.jpg
+There are no labels in 282678b0-5f4e4eb3.jpg
+There are no labels in 31a83844-ba334636.jpg
+There are no labels in 321877a3-f277463d.jpg
+There are no labels in 48f20d4e-504d2377.jpg
+There are no labels in 49cf8611-8991f7a7.jpg
+There are no labels in 51a2ee54-e7f7d10f.jpg
+There are no labels in 57ea20aa-d836f65b.jpg
+There are no labels in 65c115f0-324deb97.jpg
+Extract image info: 100%|██████████| 46964/46964 [07:58<00:00, 98.23it/s]
+Process category:   7%|▋         | 1/14 [07:58<1:43:44, 478.84s/it]traffic light/removed is not a image file
+Extract image info: 100%|██████████| 71/71 [00:00<00:00, 124.94it/s]
+Process category:  14%|█▍        | 2/14 [07:59<39:32, 197.68s/it]  trailer/removed is not a image file
+Extract image info: 100%|██████████| 788/788 [00:07<00:00, 100.83it/s]
+Process category:  21%|██▏       | 3/14 [08:07<20:22, 111.13s/it]other vehicle/removed is not a image file
+Extract image info: 100%|██████████| 2342/2342 [00:29<00:00, 80.40it/s]
+Process category:  29%|██▊       | 4/14 [08:37<13:08, 78.90s/it] motorcycle/removed is not a image file
+Extract image info: 100%|██████████| 151/151 [00:01<00:00, 85.61it/s]
+Process category:  36%|███▌      | 5/14 [08:39<07:40, 51.20s/it]other person/removed is not a image file
+Extract image info: 100%|██████████| 97/97 [00:00<00:00, 103.35it/s]
+Process category:  43%|████▎     | 6/14 [08:40<04:33, 34.23s/it]train/removed is not a image file
+Extract image info: 100%|██████████| 71419/71419 [11:51<00:00, 100.41it/s]
+Process category:  50%|█████     | 7/14 [20:33<29:51, 255.99s/it]pedestrian/removed is not a image file
+Extract image info: 100%|██████████| 3553/3553 [00:35<00:00, 101.34it/s]
+Process category:  57%|█████▋    | 8/14 [21:09<18:35, 185.92s/it]rider/removed is not a image file
+Extract image info: 100%|██████████| 6096/6096 [01:02<00:00, 97.32it/s]
+Process category:  71%|███████▏  | 10/14 [22:12<07:29, 112.49s/it]bicycle/removed is not a image file
+Extract image info: 100%|██████████| 93313/93313 [15:36<00:00, 99.60it/s]
+Process category:  79%|███████▊  | 11/14 [37:51<16:06, 322.27s/it]traffic sign/removed is not a image file
+Extract image info: 100%|██████████| 24334/24334 [04:29<00:00, 90.36it/s]
+Process category:  86%|████████▌ | 12/14 [42:22<10:17, 308.63s/it]truck/removed is not a image file
+Extract image info: 100%|██████████| 10655/10655 [01:58<00:00, 89.89it/s]
+Process category:  93%|█████████▎| 13/14 [44:22<04:16, 256.73s/it]bus/removed is not a image file
+Extract image info: 100%|██████████| 457564/457564 [1:20:01<00:00, 95.29it/s]
+Process category: 100%|██████████| 14/14 [2:04:31<00:00, 533.67s/it] .36it/s]
+car/removed is not a image file
+
+(venv-name)$ repair create_image_subset --category_dir=categories/train --output_dir=outputs/train --excluded_labels='trailer,train,other vehicle,other person' --resize_to=32 --random_state=15 --num=250000 --category_min=25000
+|               label|   num|
+|--------------------|------|
+|       traffic light| 25000|
+|          motorcycle|  2341|
+|          pedestrian| 25000|
+|               rider|  3552|
+|             bicycle|  6095|
+|        traffic sign| 32521|
+|               truck| 24333|
+|                 bus| 10654|
+|                 car|159467|
+|               total|288963|
+
+
+(venv-name)$ repair create_category_dir --image_dir=inputs/bdd100k/images/100k/val/ --label_file=inputs/bdd100k/labels/det_20/det_val.json  --output_dir=categories/val --min_area=1024
+100%|██████████| 10000/10000 [1:59:22<00:00,  1.40it/s]
+Process category:   0%|          | 0/14 [00:00<?, ?it/s]
+Extract image info: 100%|██████████| 7000/7000 [01:01<00:00, 113.88it/s]
+Process category:   7%|▋         | 1/14 [01:01<13:20, 61.60s/it]traffic light/removed is not a image file
+Extract image info: 100%|██████████| 2/2 [00:00<00:00, 79.07it/s]
+Extract image info: 100%|██████████| 82/82 [00:04<00:00, 19.11it/s]
+Process category:  21%|██▏       | 3/14 [01:06<03:13, 17.62s/it]other vehicle/removed is not a image file
+Extract image info: 100%|██████████| 369/369 [00:04<00:00, 80.94it/s]
+Process category:  29%|██▊       | 4/14 [01:10<02:11, 13.12s/it]motorcycle/removed is not a image file
+Extract image info: 100%|██████████| 1/1 [00:00<00:00, 406.78it/s]
+other person/removed is not a image file
+Extract image info: 100%|██████████| 15/15 [00:00<00:00, 83.61it/s]
+Process category:  43%|████▎     | 6/14 [01:10<00:53,  6.68s/it]train/removed is not a image file
+Extract image info: 100%|██████████| 10453/10453 [01:51<00:00, 93.45it/s]
+Process category:  50%|█████     | 7/14 [03:03<04:00, 34.30s/it]pedestrian/removed is not a image file
+Extract image info: 100%|██████████| 505/505 [00:05<00:00, 97.95it/s]
+Process category:  57%|█████▋    | 8/14 [03:08<02:38, 26.40s/it]rider/removed is not a image file
+Extract image info: 100%|██████████| 886/886 [00:09<00:00, 97.38it/s]
+Process category:  71%|███████▏  | 10/14 [03:17<01:07, 16.88s/it]bicycle/removed is not a image file
+Extract image info: 100%|██████████| 14060/14060 [02:21<00:00, 99.23it/s]
+Process category:  79%|███████▊  | 11/14 [05:39<02:20, 46.69s/it]traffic sign/removed is not a image file
+Extract image info: 100%|██████████| 3692/3692 [00:41<00:00, 89.80it/s]
+Process category:  86%|████████▌ | 12/14 [06:21<01:30, 45.35s/it]truck/removed is not a image file
+Extract image info: 100%|██████████| 1486/1486 [00:16<00:00, 87.94it/s]
+Process category:  93%|█████████▎| 13/14 [06:38<00:37, 37.85s/it]bus/removed is not a image file
+Extract image info: 100%|██████████| 66475/66475 [11:43<00:00, 94.45it/s]
+Process category: 100%|██████████| 14/14 [18:23<00:00, 78.80s/it]
+
+(venv-name)$ repair create_image_subset --category_dir=categories/val/ --output_dir=bdd_objects/val/ --excluded_labels='trailer,train,other vehicle,other person' --resize_to=32 --random_state=15 --num=25000 --category_min=2500
+|               label|   num|
+|--------------------|------|
+|       traffic light|  2500|
+|          motorcycle|   368|
+|          pedestrian|  2500|
+|               rider|   504|
+|             bicycle|   885|
+|        traffic sign|  3347|
+|               truck|  2500|
+|                 bus|  1485|
+|                 car| 15826|
+|               total| 29915|
+
+(venv-name) $ ls outputs/
+train   val
+----
+
+NOTE: This function outputs the summary file named image_info.json that includes arguments, the number of images of each category, and names of image file.
+
+.image_info.json(train)
+[source,json]
+----
+{
+    "args": {
+        "num": 250000,
+        "category_min": 25000,
+        "random_state": 15,
+        "resize_to": 32,
+        "excluded_labels": "trailer,train,other vehicle,other person"
+    },
+    "results": {
+        "traffic light": 25000,
+        "motorcycle": 2341,
+        "pedestrian": 25000,
+        "rider": 3552,
+        "bicycle": 6095,
+        "traffic sign": 32521,
+        "truck": 24333,
+        "bus": 10654,
+        "car": 159467
+    },
+    "images": [
+        {
+            "name": "231662_20931284-2dd4f36b.jpg",
+            "label": "traffic light",
+            "value_mean": 108.13327780091629,
+            "area": 2401
+        },
+        ...
+----
+
+.image_info.json(val)
+[source,json]
+----
+{
+    "args": {
+        "num": 25000,
+        "category_min": 2500,
+        "random_state": 15,
+        "resize_to": 32,
+        "excluded_labels": "trailer,train,other vehicle,other person"
+    },
+    "results": {
+        "traffic light": 2500,
+        "motorcycle": 368,
+        "pedestrian": 2500,
+        "rider": 504,
+        "bicycle": 885,
+        "traffic sign": 3347,
+        "truck": 2500,
+        "bus": 1485,
+        "car": 15826
+    },
+    "images": [
+        {
+            "name": "5540_b27098c3-dedf92b2.jpg",
+            "label": "traffic light",
+            "value_mean": 59.80043266630611,
+            "area": 1849
+        },
+        ...
+----
+
+=== Fashion-MNIST
+
+We use `Fashion-MNIST` as benchmark for validation of our framework.
+This benchmark is imported from `keras.datasets` in the code.
+
+* https://research.zalando.com/welcome/mission/research-projects/fashion-mnist/[Dataset site]
+
+=== CIFAR-10
+
+We use `CIFAR-10` as benchmark for validation of our framework.
+This benchmark is imported from `keras.datasets` in the code.
+
+* https://www.cs.toronto.edu/~kriz/cifar.html[Dataset site]
+
+=== Preparation
+
+To prepare train, repair and test datasets, execute the following command:
+
+[source,bash]
+----
+(venv-name) $ repair prepare --dataset=gtsrb
+----
+
+NOTE: This function divides training data into for training and for repairing to prevent using test data for repair. As a result, this function creates three datasets, `train.h5`, `repair.h5` and `test.h5`.
+
+.Options
+|===
+|Option|Description|Default
+
+| `dataset` | Name of dataset. `gtsrb`, `bdd`, `bdd-objects`, `fashion-mnist` and `cifar-10` are available.  | `None`
+| `input_dir` | Path to directory containing raw data of dataset | `inputs/`
+| `output_dir` | Path to directory where train, repair and test dataset (e.g., `train.h5`, `repair.h5` and `test.h5`) are saved | `outputs/`
+|`divide_rate`|The ratio of dividing training data for using repair.|0.2
+|`random_state`|The seed value of random sampling for reproducibility of dividing training data. |`None`
+| `target_label` +
+(Only for `BDD` dataset) | Target label of `BDD` dataset. `weather` and `scene` are available. | `weather`
+|===
+
+== DNN Model
+
+=== Training
+
+To train the train dataset and generate a DNN model,
+execute the following command:
+
+[source,bash]
+----
+(venv-name) $ repair train --model=base
+----
+
+NOTE: This function uses `train.h5` created in `prepare`.
+
+.Options
+|===
+|Option|Description|Default
+
+| `model` | Name of DNN model. The names of `base`, `vgg19`, `vgg16`, `vit`, `hydra`, `hydra_head` and `keras_app` are available | `base`
+| `epochs` | The number of epochs | `5`
+| `validation_split` | The radio of splitting training data for validation | `0.2`
+| `gpu` | Enable GPU configuration | `False`
+| `data_dir` | Path to directory containing train data (e.g., `train.h5`) | `outputs/`
+| `output_dir` | Path to directory where DNN model data are saved | `outputs/`
+|`model_settings` +
+(Only for `keras_app`)| Path to file that designate keras applications and optimizer, and configure additional layers. |`None`
+|`branch_num` +
+(Only for `hydra`)|The number of branches of hydra model|`3`
+|`hydra_head_dir` +
+(Only for `hydra_head`)|Path to directory containing Hydra's gate directory trained with a dataset created by `create_gate_dir`.|`None`
+|===
+
+<<ref-sohn_arXiv_19,Sohn+@arXiv'19>> describes:
+
+* Epoch
+
+> ..., we simply under-train a DNN using a given training dataset
+> by reducing the number of epochs spent for training.
+
+* Model
+
+> After the VGG16, we added two dense layers (DENSE(4096), DENSE(4096)),
+> followed by the final layer for labels(DENSE(43)).
+
+* Validation
+
+> ..., we use 20% of the training data as the validation set.
+
+These configurations can be
+
+[source,bash]
+----
+(venv-name) $ repair train \
+    --epochs=5 \
+    --model=vgg16 \
+    --validation_split=0.2
+----
+
+NOTE: We implement `vgg16` as the fine-tuned VGG16 model.
+
+
+NOTE: `keras_app` can load the models in https://www.tensorflow.org/versions/r2.6/api_docs/python/tf/keras/applications[keras applications]. It requires a `model_settings` file, which is a json file that contains `model`(mandatory) for designating the model of `keras applications`, `optimizer`(optional: the default optimizer is https://www.tensorflow.org/versions/r2.6/api_docs/python/tf/keras/optimizers/SGD[SGD]) for designating an https://www.tensorflow.org/versions/r2.6/api_docs/python/tf/keras/optimizers[optimizer], `augmentation`(optional) for configuring https://www.tensorflow.org/tutorials/images/data_augmentation[data-augmentation layer] inserted after the input layer  and `layers`(optional) for configuring additional https://www.tensorflow.org/versions/r2.6/api_docs/python/tf/keras/layers[layers]. An example that loads `EfficientNetB7` and attach `GlobalAveragePooling2D`, `BatchNormalization` and `Dropout` with the optimizer `Adam` is as below.
+
+[source,json]
+.EfficientNetB7.json
+----
+{
+    "model":"EfficientNetB7",
+    "optimizer":["Adam",{"learning_rate":1e-4}],
+    "augmentation":[
+        ["RandomRotation",
+            {"factor":0.1,"seed":15}
+        ],
+        ["RandomFlip",
+            {"mode":"horizontal","seed":15}
+        ],
+        ["RandomZoom",
+            {"height_factor":0.1,"width_factor":0.1,"seed":15}
+        ]
+    ],
+    "layers":[
+        ["GlobalAveragePooling2D",
+            {"name":"customize_avg_pool2D"}
+        ],
+        ["BatchNormalization",
+            {"name":"customize_batch_norm"}],
+        ["Dropout",
+            {"rate":0.2,
+             "name":"customize_dropout"}]
+
+    ]
+}
+----
+
+NOTE: `vit(Vision Transformer)` requires to change the form of the dataset's label from one-hot vector to label vector. Convert the datasets for `vit` by using <<create_vit_class>>.
+
+NOTE: `hydra_head` creates a DNN model with a hydra head, which has a gate layer and several branch layers. The gate layer classifies categories of labels. The branch layers classify the labels of their designated categories. The gate layer decides which branch layer's outputs use. `hydra_head` requires `hydra_head_dir`, which is a path to a directory containing a `gate` directory that has a DNN model trained with a dataset created by `create_hydra_gate`(The head of the taken model will be used as `gate` layer).
+
+=== Evaluating
+
+To evaluate the DNN model with test dataset, execute the following command:
+
+[source,bash]
+----
+(venv-name) $ repair test
+----
+
+NOTE: This function uses `test.h5` created in `prepare`.
+
+.Options
+|===
+|Option|Description|Default
+
+| `target_data`| Filename of H5 in `data_dir`|`test.h5`
+| `model_dir` | Path to directory containing DNN model data. | `outputs/`
+| `data_dir` | Path to directory containing target dataset (e.g., `test.h5`) | `outputs/`
+| `verbose` | The (0, 1, 2) means (silent, progress bar, one line per epoch) mode | `0`
+| `batch_size` | The size of batch | `32`
+|===
+
+== Target Dataset
+
+The commend `target` below is designed
+to create subsets of repair dataset (called as `target datasets`)
+to reproduce failures on DNN models.
+
+[source,bash]
+----
+(venv-name) $ repair target
+----
+
+NOTE: This function uses `repair.h5` created in `prepare`.
+
+.Options
+|===
+|Option|Description|Default
+
+| `model_dir` | Path to directory containing DNN model data. | `outputs/`
+| `data_dir` | Path to directory where target dataset (e.g., `negative/{asterisk}/repair.h5` and `positive/{asterisk}/repair.h5`) are saved. The `repair.h5` must be in the directory. | `outputs/`
+| `batch_size` | The size of batch | `32`
+|===
+
+=== Example Results
+
+For example, the execution results below shows:
+
+1. Create target datasets
+2. Confirm the datasets created
+3. Test a DNN model with one of the datasets
+
+[source,bash]
+----
+(venv-name) $ repair target \
+    --model_dir=outputs/gtsrb/ \
+    --data_dir=outputs/gtsrb/
+(venv-name) $ tree outputs/gtsrb/negative/
+outputs/gtsrb/negative/
+├── 0
+│   ├── 1
+│   │   └── repair.h5
+│   ├── 19
+│   │   └── repair.h5
+│   ├── 25
+│   │   └── repair.h5
+│   ├── 8
+│   │   └── repair.h5
+│   ├── labels.json
+│   └── repair.h5
+├── 1
+│   ├── 13
+│   │   └── repair.h5
+...
+├── 8
+│   ├── 14
+│   │   └── repair.h5
+│   ├── 4
+│   │   └── repair.h5
+│   ├── labels.json
+│   └── repair.h5
+├── labels.json
+└── repair.h5
+
+87 directories, 113 files
+(venv-name) $ repair test \
+    --model_dir=outputs/gtsrb/ \
+    --target_data=repair.h5 \
+    --data_dir=outputs/gtsrb/negative/0/
+Using TensorFlow backend.
+...
+accuracy: 0.00%
+----
+
+== Automated Repair
+
+We provide these repair methods.
+
+.Repair Methods
+|===
+|Name|Description
+| `Arachne` | Arachne is a search-based repair technique to localize and optimize neural weights. 
+| `Athena` | Athena is based on Arachne, and it is designed to repair multiple labels simultaneously. +
+(Athena is provided as a third pary plugin. See <<_Third Party Plugins, this section>>) to know how to install third party plugins.
+| `DRWeightMerge` | DRWeightMerge is based on Arachne, that targets to consider risk levels.
+|===
+
+=== Localizing Neural Weights
+
+The `localize` command works for localizing neural weight candidates to repair and outputs them into `weights.csv`.
+
+[source,bash]
+----
+(venv-name) $ repair localize --method=Arachne
+----
+
+.Options
+|===
+|Option|Description|Default
+
+| `method` | Name of repair method. `Arachne`, `Athena`, and `DRWeightMerge` are available. | `None`
+| `model_dir` | Path to directory containing DNN model data. | `outputs/`
+| `target_data_dir` | For Arachne, path to directory containing negative inputs (e.g., `repair.h5`) +
+For Athena, path to direcory containing negative inputs dirs and `labels.json` (e.g. `negative` generated in `target`) | `outputs/negative/0/`
+| `num_grad` +
+(Only for `Arachne` method)| The number of neural weight candidates to choose based on gradient loss | `None`, i.e., set to be the number of negative inputs to repair multiplied by 20
+|`target_layer`| Target layer for localizing neural weights, which must be `keras.layers.core.Dense ` |`None`, i.e. set the Dense layer which is the nearest to the output layer 
+|`verbose`|The verbosity level of output results. (0:None, 1:Created file, 2:Created file and localized weights)|`1`
+| `negative_root_dir` +
+(Only for `DRWeightMerge` method) | Path to directory containing negative data. | `outputs/negative/`
+| `dataset` +
+(Only for `DRWeightMerge` method) | The name of dataset of repair. The same values available for the `dataset` parameter of `prepare` can be acceptable. | `None`
+| `weight_path` +
+(Only for `DRWeightMerge` method) | Path to the setting file. | `dr_setting.json`
+|`batch_size` | The size of batch | `32`
+|===
+
+==== Settings
+
+To use `DRWeightMerge`, you must provide a setting file that can be given by `weight_path`. Its format is as follows:
+
+.Format
+|===
+| Key | Type | Description
+
+| `target_misclassifications` | `dict[str, list[str]]` | The key is the name of a true label. The value is a list of the misclassified label names.
+| `general_misclassifications` | `list[str]` | List of the label names that should be entirely repaired.
+| `weights_precisions` | `dict[str, float]` | List up the label names that you want to maintain its accuracy. The bigger value implies the higher priority level. The sum of priority level values must not be 0 and each value must not be negative.
+| `weights_mislassifications` | `dict[str, float]` | List up the label name or pair of the label names to set risk levels. The bigger value implies the higher risk level. The key is the true label name or a comma-joined pair of the true and misclassified label names. The sum of risk level values must not be 0 and each value must not be negative.
+|===
+ 
+.Example
+[source,json]
+----
+{
+    "target_misclassifications": {
+        "car": ["rider", "truck"],
+        "pedestrian": ["rider"]
+
+    },
+    "general_misclassifications": ["car", "pedestrian"],
+    "weights_precisions": {
+        "pedestrian": 0.375,
+        "car": 0.25,
+        "bicycle": 0.25,
+        "rider": 0.125
+    },
+    "weights_misclassifications": {
+        "pedestrian": 0.2,
+        "car,rider": 0.2,
+        "rider": 0.13,
+        "car,truck": 0.13,
+        "bicycle": 0.13,
+        "pedestrian,rider": 0.07,
+        "rider,pedestrian": 0.07,
+        "motorcycle,pedestrian": 0.07
+    }
+}
+----
+
+=== Optimizing Neural Weights
+
+The `optimize` command works for generating patches to repair a DNN model.
+
+[source,bash]
+----
+(venv-name) $ repair optimize --method=Arachne
+----
+
+.Options
+|===
+|Option|Description|Default
+
+| `method` | Name of repair method. `Arachne`, `Athena`, and `DRWeightMerge` are available. | `None`
+| `model_dir` | Path to directory containing a DNN model. | `outputs/`
+| `target_data_dir` | For Arachne, path to directory containing negative inputs (e.g., `repair.h5`), i.e., dataset for unexpected behavior on given DNN model and neural weights candidates to repair (e.g., `weights.csv`) +
+For Athena, path to direcory containing negative inputs dirs and `labels.json` (e.g. `negative` generated in `target`) | `outputs/negative/0/`
+| `positive_inputs_dir` | Path to directory containing positive inputs (e.g., `repair.h5`), i.e., dataset for correct behavior on given DNN model | `outputs/positive/`
+| `output_dir` | Path to directory where analysis results are saved | `None`,i.e. the same as the `target_data_dir`
+|`num_particles`  +
+(Only for `Arachne`, `Athena`, and `DRWeightMerge` methods) | The number of particles on PSO search | `100`
+|`num_iterations` +
+ (Only for `Arachne`, `Athena`, and `DRWeightMerge` methods) | The number of iterations on PSO search | `100`
+|`num_input_pos_sampled` +
+(Only for `Arachne` and `Athena` methods) | The number of positive inputs to sample | `200`
+|`velocity_phi` +
+(Only for `Arachne` and `Athena` methods) | The phi parameter for updating velocity | `4.1`
+|`min_iteration_range` +
+(Only for `Arachne` and `Athena` methods) | The minimum of trial to find better patch during PSO iteration | `10`
+| `negative_root_dir` +
+(Only for `DRWeightMerge` method) | Path to directory containing negative data. | `outputs/negative/`
+| `dataset` +
+(Only for `DRWeightMerge` method) | The name of dataset of repair. The same values available for the `dataset` parameter of `prepare` can be acceptable. | `None`
+| `weight_path` +
+(Only for `DRWeightMerge` method) | Path to the setting file. | `dr_setting.json`
+|`verbose`|The verbosity level of output results. (0:None, 1:Created file, 2:Created file and optimized weights)|`1`
+|`batch_size` | The size of batch | `32`
+|===
+
+=== Example Results
+
+For example, the execution results below shows:
+
+1. Test the original model with all inputs to compute baseline
+2. Localize neural weight candidates to repair
+3. Confirm the localization results
+4. Confirm again
+5. Optimize the neural weight candidates
+6. Confirm the optimization
+7. Test the repaired model with negative inputs to find repairing
+8. Test the repaired model with positive inputs to find degradation
+9. Test the repaired model with all inputs to compare repair result with baseline
+
+[source,bash]
+----
+(venv-name) $ repair test \
+    --model_dir=outputs/gtsrb/ \                    # Use original model
+    --data_dir=outputs/gtsrb/                       # to all inputs
+...
+accuracy: 87.06%  # Baseline
+(venv-name) $ repair localize --method=Arachne \
+    --model_dir=outputs/gtsrb/ \
+    --target_data_dir=outputs/gtsrb/negative/0/
+(venv-name) $ tree outputs/gtsrb/negative/0/
+outputs/gtsrb/negative/0/
+├── pareto_front.png
+├── repair.h5
+└── weights.csv
+
+0 directories, 3 files
+(venv-name) $ cat outputs/gtsrb/negative/0/weights.csv
+# layer, x, y, weight value
+21,2172,764,0.023148205
+21,2172,1469,0.03150911
+21,1014,1469,0.03364949
+21,2172,3120,0.03790862
+21,2172,643,-0.03315975
+21,2172,540,0.035233732
+21,2172,722,-0.034597863
+21,2172,192,0.04262299
+21,2172,1053,0.0044069723
+(venv-name) $ repair optimize --method=Arachne \
+    --model_dir=outputs/gtsrb/ \
+    --target_data_dir=outputs/gtsrb/negative/0/ \
+    --positive_inputs_dir=outputs/gtsrb/positive/ \
+    --output_dir=outputs/gtsrb/negative/0/ \
+    --num_particles=100 \
+    --num_iterations=100
+(venv-name) $ tree outputs/gtsrb/negative/0/repair
+outputs/gtsrb/negative/0/repair/
+├── assets/
+├── keras_metadata.pb
+├── saved_model.pb
+└── variables/
+
+
+0 directories, 2 files
+(venv-name) $ repair test --model=base \
+    --model_dir=outputs/gtsrb/negative/0/repair/ \  # Use repaired model
+    --target_data=repair.h5                         # the dataset for repairing
+    --data_dir=outputs/gtsrb/negative/0/            # to target negative inputs
+...
+accuracy: 23.33%  # Repaired!!!
+(venv-name) $ repair test --model=base \
+    --model_dir=outputs/gtsrb/negative/0/repair/ \  # Use repaired model
+    --target_data=repair.h5                         # the dataset for repairing
+    --data_dir=outputs/gtsrb/positive/              # to positive inputs
+...
+accuracy: 99.78%  # Degraded...
+(venv-name) $ repair test --model=base \
+    --model_dir=outputs/gtsrb/negative/0/repair/ \  # Use repaired model
+    --data_dir=outputs/gtsrb/                       # to all inputs
+...
+accuracy: 87.15%  # Greater than 87.06%!!!
+
+(venv-name) $ cat outputs/gtsrb/negative/0/weights.csv
+# layer, x, y, weight value, repaired value
+21,2172,764,0.023148205,0.0039355378
+21,2172,1469,0.03150911,-0.018625021
+21,1014,1469,0.03364949,-0.0023198929
+21,2172,3120,0.03790862,-0.03033192
+21,2172,643,-0.03315975,0.012457683
+21,2172,540,0.035233732,0.0006541489
+21,2172,722,-0.034597863,0.011639649
+21,2172,192,0.04262299,-0.021877125
+21,2172,1053,0.0044069723,-0.0062772273
+
+----
+
+== Evaluate
+
+To evaluate the effectiveness of repair, execute the following command:
+
+[source,bash]
+----
+(venv-name) $ repair evaluate --method=Arachne
+----
+
+CAUTION: This function is not implemented in `Athena`
+
+.Options
+|===
+|Option|Description|Default
+
+| `dataset` | Name of dataset. `gtsrb`, `bdd`, `bdd-objects`, `fashion-mnist` and `cifar-10` are available. | `None`
+| `method` | Name of repair method. `Arachne` and `Athena` is available. | `None`
+| `model_dir` | Path to directory containing DNN model data. | `outputs/`
+| `target_data_dir` | For Arachne, path to directory containing negative inputs (e.g., `repair.h5`), i.e., dataset for unexpected behavior on given DNN model and neural weights candidates to repair (e.g., `weights.csv`) | `outputs/negative/0/`
+| `positive_inputs_dir` | Path to directory containing positive inputs (e.g., `repair.h5`), i.e., dataset for correct behavior on given DNN model | `outputs/positive/`
+| `output_dir` | Path to directory where analysis results are saved | `None`,i.e. the same as the `target_data_dir`
+| `num_grad` +
+(Only for `Arachne` method)| The number of neural weight candidates to choose based on gradient loss | `None`, i.e., set to be the number of negative inputs to repair multiplied by 20
+| `num_particles`  +
+(Only for `Arachne` and `Athena` methods) | The number of particles on PSO search | `100`
+| `num_iterations` +
+ (Only for `Arachne` and `Athena` methods) | The number of iterations on PSO search | `100`
+| `num_runs` | The number of repair runs | `10`
+|`verbose`|The verbosity level of output results. (0:None, 1:Created file, 2:Created file and RR/BR)|`1`
+| `batch_size` | The size of batch | `32`
+|===
+
+.Example
+[source,bash]
+----
+(venv-name) $ repair evaluate --dataset=gtsrb --method=Arachne --model_dir=outputs/gtsrb/ --target_data_dir=outputs/gtsrb/negative/0/ --positive_inputs_dir=outputs/gtsrb/positive/ --output_dir=outputs/gtsrb/negative/0/ --num_particles=3 --num_iterations=3 --num_runs=5
+(venv-name) $ tree outputs/gtsrb/negative/0/
+outputs/gtsrb/negative/0/
+├── localized_data_0
+│   ├── pareto_front.png
+│   └── weights.csv
+├── localized_data_1
+│   ├── pareto_front.png
+│   └── weights.csv
+├── localized_data_2
+│   ├── pareto_front.png
+│   └── weights.csv
+├── localized_data_3
+│   ├── pareto_front.png
+│   └── weights.csv
+├── localized_data_4
+│   ├── pareto_front.png
+│   └── weights.csv
+├── repaired_model_0
+│   └── repair
+│       ├── assets/
+│       ├── keras_metadata.pb
+│       ├── saved_model.pb
+│       └── variables/
+├── repaired_model_1
+│   └── repair
+│       ├── assets/
+│       ├── keras_metadata.pb
+│       ├── saved_model.pb
+│       └── variables/
+├── repaired_model_2
+│   └── repair
+│       ├── assets/
+│       ├── keras_metadata.pb
+│       ├── saved_model.pb
+│       └── variables/
+├── repaired_model_3
+│   └── repair
+│       ├── assets/
+│       ├── keras_metadata.pb
+│       ├── saved_model.pb
+│       └── variables/
+├── repaired_model_4
+│   └── repair
+│       ├── assets/
+│       ├── keras_metadata.pb
+│       ├── saved_model.pb
+│       └── variables/
+├── result.txt
+└── repair.h5
+
+15 directories, 22 files
+(venv-name) $ cat outputs/gtsrb/negative/0/result.txt
+# Settings
+dataset: GTSRB
+method: Arachne
+model_dir: outputs/gtsrb/
+num_grad: 1140
+target_data_dir: outputs/gtsrb/negative/0/
+positive_inputs_dir: outputs/gtsrb/positive/
+output_dir: outputs/gtsrb/negative/0/
+num_particles: 3
+num_iterations: 3
+num_runs: 5
+
+# Results
+0: RR 0.00%, BR 0.01%
+1: RR 0.00%, BR 0.01%
+2: RR 0.00%, BR 0.01%
+3: RR 0.00%, BR 0.01%
+4: RR 0.00%, BR 0.01%
+
+Average: RR 0.00%, BR 0.01%
+----
+
+== Utilities
+
+We provide some utility functions in this framework.
+Users can add and call their own utility functions by adding the modules to the package `repair.utils`. 
+The code style of the modules must follow the rules as below.
+
+* Must implement `run()` method. This is the entrypoint of the utils.
+* `run()` should accept `**kwargs`. Any options will be passed via `**kwargs`.
+
+Example code:
+
+./src/repair/utils/example.py
+[source,python]
+----
+def run(**kwargs):
+    if 'model_dir' in kwargs:
+        model_dir = Path(kwargs['model_dir'])
+    else:
+        raise Exception("Require --model_dir")
+    if 'data_dir' in kwargs:
+        data_dir = Path(kwargs['data_dir'])
+    else:
+        raise Exception("Require --data_dir")
+    ...
+----
+
+Users can call the above example as below if implemented actually.
+
+[source,bash]
+----
+(venv-name) $ repair utils example \
+    --model_dir=... \
+    --data_dir=...
+----
+
+=== Extract Images from H5
+
+The following command works for extracting images from a dataset file under `input_dir` to an `images` directory under `output_dir`.
+
+.Options
+|===
+|Option|Description|Default
+
+| `input_dir` | Path to directory containing `target_data` | `None`
+| `target_data`| Filename of H5 in `input_dir`|`repair.h5`
+| `output_dir` | Save images into `images` directory under `output_dir` | `input_dir`
+|===
+
+[source,bash]
+----
+(venv-name) $ repair utils extract_images \
+    --input_dir=outputs/negative/0/ \
+    --output_dir=outputs/negative/0/
+(venv-name) $ tree outputs/gtsrb/negative/0/images/
+outputs/gtsrb/negative/0/images/
+├── 00000000.ppm
+├── 00000001.ppm
+├── 00000002.ppm
+...
+└── 00000051.ppm
+
+0 directories, 52 files
+----
+
+=== Merge Repair Data
+
+The following command works for merging images.
+
+.Options
+|===
+|Option|Description|Default
+
+| `input_dir1` | Path to directory containing `repair.h5` | `None`
+| `input_dir2` | Path to directory containing `repair.h5` | `None`
+| `output_dir` | Save merged `repair`.h5` into `output_dir` | `None`
+|===
+
+[source,bash]
+----
+(venv-name) $ repair utils merge_repair_data \
+    --input_dir1=outputs/negative/14/ \
+    --input_dir1=outputs/negative/17/ \
+    --output_dir=outputs/merge/n14_n17/
+(venv-name) $ tree outputs/merge/n14_n17/
+tree outputs/merge/n14_n17/
+└── repair.h5
+
+0 directories, 1 files
+----
+
+=== Draw Radar Chart
+
+The following command works for drawing radar chart.
+
+NOTE: This command saves prediction results with a given model into `results.json`.
+
+.Options
+|===
+|Option|Description|Default
+
+| `input_dir` | Path to directory containing `target_data` | `None`
+| `target_data`| Filename of H5 in `input_dir`|`repair.h5`
+| `model_dir` | Path to directory containing a DNN model. | `None`
+| `min_lim` | minimum limitation of radar chart | 0
+| `max_lim` | max limitation of radar chart | 100
+| `filename` | Filename of radar chart | `radar.png`
+| `output_dir` | Save radar chart (e.g., `radar.png`) in addition to prediction results (e.g., `results.json`) | `None`
+|===
+
+
+[source,bash]
+----
+(venv-name) $ repair utils draw_radar_chart \
+    --input_dir=outputs \
+    --model_dir=outputs/negative/repair \
+    --output_dir=outputs/negative/repair
+(venv-name) $ tree outputs/negative/repair
+outputs/negative/repair/
+├── assets/
+├── keras_metadata.pb
+├── saved_model.pb
+├── variables/
+├── radar.png
+└── results.json
+
+0 directories, 4 files
+(venv-name) $ open outputs/negative/repair/radar.png
+----
+
+image:radar.png[]
+
+=== Draw Overlay Radar Chart
+
+The following command works for drawing radar chart with two or three datasets in an overlay manner.
+
+CAUTION: This command requires `results.json`.
+Run `draw_radar_chart` on each dataset in advance.
+
+.Options
+|===
+|Option|Description|Default
+
+
+| `input_dir` | Path to directory containing `results.json` | `None`
+| `input_dir_overlay` | Path to directory containing `results.json` | `None`
+| `input_dir_overlay2` | Path to directory containing `results.json` | `None`
+| `min_lim` | minimum limitation of radar chart | 0
+| `max_lim` | max limitation of radar chart | 100
+| `legend` | Legend for base inputs | `Inputs (base)`
+| `legend_overlay` | Legend for overlay inputs | `Inputs (overlay)`
+| `legend_overlay2` | Legend for second overlay inputs | `Inputs (overlay2)`
+| `filename` | Filename of radar chart | `radar.png`
+| `output_dir` | Save radar chart (e.g., `radar.png`) | `input_dir`
+|===
+
+----
+(venv-name) $ repair utils overlay_radar_charts \
+    --input_dir=outputs \
+    --input_dir_overlay=outputs/negative/repair \
+    --legend=Baseline \
+    --legend_overlay="Our Technique" \
+    --output_dir=outputs/negative/repair \
+    --filename=radar_compare.png
+(venv-name) $ tree outputs/negative/repair/
+outputs/negative/repair/
+├── assets/
+├── keras_metadata.pb
+├── saved_model.pb
+├── variables/
+├── radar.png
+├── radar_compare.png
+└── results.json
+
+0 directories, 5 files
+(venv-name) $ open outputs/negative/repair/radar_compare.png
+----
+
+image:radar_compare.png[]
+
+
+=== Draw Bubble Chart of Confusion Matrix
+
+The following command works for drawing bubble chart of confusion matrix of test data and model's prediction.
+
+.Options
+|===
+|Option|Description|Default
+
+
+| `test_dir` | Path to directory containing `test.h5` | None
+| `model_dir` | Path to directory containing `model.h5` | None
+| `output_dir` | Path to directory where the output image is to be saved | `outputs/`
+| `test_data` | File name of test data | `test.h5`
+| `filename` | File name of the output image. | `bubble.png`
+|===
+
+
+----
+(venv-name) $ repair utils draw_bubble_chart \
+    --test_dir=outputs \
+    --model_dir=outputs \
+    --output_dir=outputs \
+    --filename=fashion.png 
+(venv-name) $ oepn outputs/fashion.png
+----
+
+image:fashion.png[]
+
+=== Calculate risks at specific scene
+
+The following command calculate the risks in images that meet the attributes(e.g., weather, scene, timeofday) and label.
+For attributes and label, if you specify a value, only the images that match the conditions are extracted.
+In the case of `None`, no filtering is performed for that condition.
+
+.Options
+|===
+|Option|Description|Default
+
+
+| `calc_target` | Target to calculate | `None`
+| `h5_dataset_path` | Path to directory containing results of `repair prepare`. | `None`
+| `create_image_subset_output_path` | Path to directory containing results of `repair create_image_subset`. | `None`
+| `output_dir` | Path to directory where the output image is to be saved. | `outputs/`
+| `format_json` | Format the output json to make it easier to read. | `False`
+|===
+
+.Additional options (if use `calc_target`=`scene_prob` or `scene_prob_and_miss_rate`)
+|===
+|Option|Description|Default
+
+| `scalabel_format_label_path` | Label file used to generate `h5_dataset_path`. See jupyter notebook file for details. | `None`
+| `label` | Condition for filtering images. If None is specified, all labels are selected. Filtering is done numerically. If a value of type string is given, convert it to a 0-indexed number according to the below label correspondence table. | `None`
+| `attributes` | Condition for filtering images. If you want to make a condition that the value of some attribute A is B and the value of C is D, write `--attributes=A=B,C=D`. If None is specified, all labels are selected. | `None`
+|===
+
+
+The specific correspondence of the label is as follows.
+[source, bash]
+----
+label_to_class = {'bicycle': 0,
+                    'bus': 1,
+                    'car': 2,
+                    'motorcycle': 3,
+                    'other person': 4,
+                    'other vehicle': 5,
+                    'pedestrian': 6,
+                    'rider': 7,
+                    'traffic light': 8,
+                    'traffic sign': 9,
+                    'trailer': 10,
+                    'train': 11,
+                    'truck': 12}
+----
+
+.Additional options(if use `calc_target`=`miss_rate` or `scene_prob_and_miss_rate`)
+|===
+|Option|Description|Default
+
+
+| `model_dir` | Path to directory containing `model.h5` | `None`
+|===
+
+.Function information for each `calc_target`
+|===
+|calc_target|Description
+
+
+| `scene_prob` | Calculate the probability of occurrence of a specific scene from Datasets.
+| `miss_rate` | Calculate the false recognition rate for a given trained model on a specific dataset.
+| `scene_prob_and_miss_rate` | After outputting the results of `calc_target=scene_prob`, execute `calc_target=miss_rate` using only the data that meets the specified query.
+|===
+
+.Example execution for `calc_target=scene_prob`.
+[source,bash]
+----
+repair utils risk_calculation_tool \
+    --calc_target=scene_prob \
+    --h5_dataset_path=outputs/prepare_result/ \
+    --create_image_subset_output_path=outputs/create_image_subset_result/ \
+    --output_dir=outputs/scene_prob/ \
+    --format_json=True \
+    --scalabel_format_label_path=outputs/bdd100k/labels/det_20/ \
+    --label=car \
+    --attributes=weather=rainy,timeofday=dawn/dusk
+----
+
+.Example result of `calc_target=scene_prob`.
+The list of images matching the query is stored in folder `matched_data`.
+
+[source, bash]
+----
+$ cat outputs/scene_prob/results.json
+{
+    "response": {
+        "query": {
+            "label": "2",
+            "weather": "rainy",
+            "timeofday": "dawn/dusk"
+        },
+        "scene_prob": {
+            "summary": {
+                "total_image_count": 393880,
+                "image_count_matched_to_query": 1184,
+                "existence_rate": 0.003005991672590637
+            }
+        }
+    }
+}
+
+$ ls -1 outputs/scene_prob/matched_data | wc -l
+1184
+
+$ ls -1 outputs/scene_prob/matched_data | head
+1000810_8cc99f48-ca215966.jpg
+1000811_8cc99f48-ca215966.jpg
+1002699_8d18f11d-2d2299e7.jpg
+1008112_8dd654ee-75143ef0.jpg
+1008113_8dd654ee-75143ef0.jpg
+100958_0e587038-3a0073a1.jpg
+1015320_8ec8ab14-277df119.jpg
+1015322_8ec8ab14-277df119.jpg
+1015334_8ec8ab14-277df119.jpg
+1035386_9195066c-31518c7b.jpg
+----
+
+.Example execution for `calc_target=miss_rate`.
+[source,bash]
+----
+CUDA_VISIBLE_DEVICES=-1 repair utils risk_calculation_tool \
+    --calc_target=miss_rate \
+    --h5_dataset_path=outputs/prepare_result \
+    --create_image_subset_output_path=outputs/create_image_subset_result/ \
+    --output_dir=outputs/miss_rate/ \
+    --format_json=True \
+    --model_dir=outputs/VGG16/
+----
+
+.Example result of `calc_target=miss_rate`.
+The list of misrecognized images is stored in `misrecognision_data`.
+The file structure of that folder looks like this:
+`misrecognision_data/${ground_truth_class_id}/${predicted_class_id}/${filename}`
+
+[source, bash]
+----
+$ fold outputs/miss_rate/results.json
+{
+    "response": {
+        "miss_rate": {
+            "summary": {
+                "0": {
+                    "total_image_count": 6980,
+                    "misrecognized_image_count": 1366,
+                    "misrecognized_rate": 0.19570200573065902
+                },
+                "1": {
+                    "total_image_count": 12139,
+                    "misrecognized_image_count": 5378,
+                    "misrecognized_rate": 0.44303484636296236
+                },
+                "2": {
+                    "total_image_count": 225941,
+                    "misrecognized_image_count": 11883,
+                    "misrecognized_rate": 0.0525933761468702
+                },
+(omitted. full result is written in jupyter notebook)
+            }
+        }
+    }
+}
+
+$ tree outputs/miss_rate/misrecognision_data -L 2
+outputs/miss_rate/misrecognision_data
+├── 0
+│   ├── 1
+│   ├── 12
+│   ├── 2
+│   ├── 3
+│   ├── 6
+│   ├── 7
+│   ├── 8
+│   └── 9
+├── 1
+│   ├── 0
+│   ├── 12
+│   ├── 2
+│   ├── 3
+│   ├── 6
+│   ├── 7
+│   ├── 8
+│   └── 9
+(omitted. full result is written in jupyter notebook)
+
+$ ls -1 outputs/miss_rate/misrecognision_data/0/1 |  head -n 5
+1059039_9542db5e-dea288c8.jpg
+1240245_addf601d-df742bd4.jpg
+1240877_adf9e7c8-17566506.jpg
+125749_c2ab5734-0f552875.jpg
+152273_c605bc6e-a4a48e5c.jpg
+----
+
+.Example execution for `calc_target=scene_prob_and_miss_rate`.
+[source, bash]
+----
+CUDA_VISIBLE_DEVICES=-1 repair utils risk_calculation_tool \
+    --calc_target=scene_prob_and_miss_rate \
+    --h5_dataset_path=outputs/prepare_result \
+    --create_image_subset_output_path=outputs/create_image_subset_result/ \
+    --output_dir=outputs/scene_prob_and_miss_rate/ \
+    --scalabel_format_label_path=outputs/bdd100k/labels/det_20/ \
+    --label=car \
+    --attributes=weather=rainy,timeofday=dawn/dusk \
+    --model_dir=outputs/VGG16/
+----
+
+.Example result of `calc_target=scene_prob_and_miss_rate`.
+Both `calc_target=scene_prob` and `calc_target=miss_rate` results are outputted.
+
+[source, bash]
+----
+$ fold outputs/scene_prob_and_miss_rate/results.json
+{"response": {"query": {"label": "2", "weather": "rainy", "timeofday": "dawn/dus
+k"}, "scene_prob": {"summary": {"total_image_count": 393880, "image_count_matche
+d_to_query": 1184, "existence_rate": 0.003005991672590637}}, "miss_rate": {"summ
+ary": {"0": {"total_image_count": 0, "misrecognized_image_count": 0, "misrecogni
+zed_rate": 0}, "1": {"total_image_count": 0, "misrecognized_image_count": 0, "mi
+srecognized_rate": 0}, "2": {"total_image_count": 1184, "misrecognized_image_cou
+nt": 64, "misrecognized_rate": 0.05405405405405406}, "3": {"total_image_count": 
+0, "misrecognized_image_count": 0, "misrecognized_rate": 0}, "4": {"total_image_
+count": 0, "misrecognized_image_count": 0, "misrecognized_rate": 0}, "5": {"tota
+l_image_count": 0, "misrecognized_image_count": 0, "misrecognized_rate": 0}, "6"
+: {"total_image_count": 0, "misrecognized_image_count": 0, "misrecognized_rate":
+ 0}, "7": {"total_image_count": 0, "misrecognized_image_count": 0, "misrecognize
+d_rate": 0}, "8": {"total_image_count": 0, "misrecognized_image_count": 0, "misr
+ecognized_rate": 0}, "9": {"total_image_count": 0, "misrecognized_image_count": 
+0, "misrecognized_rate": 0}, "10": {"total_image_count": 0, "misrecognized_image
+_count": 0, "misrecognized_rate": 0}, "11": {"total_image_count": 0, "misrecogni
+zed_image_count": 0, "misrecognized_rate": 0}, "12": {"total_image_count": 0, "m
+isrecognized_image_count": 0, "misrecognized_rate": 0}}, "confusion_matrix": [[0
+, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+[2, 6, 1120, 1, 0, 0, 4, 2, 2, 8, 0, 0, 39], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+ 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0,
+ 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]}}}
+
+$ ls -1 outputs/scene_prob_and_miss_rate/matched_data | head -n 5
+1000810_8cc99f48-ca215966.jpg
+1000811_8cc99f48-ca215966.jpg
+1002699_8d18f11d-2d2299e7.jpg
+1008112_8dd654ee-75143ef0.jpg
+1008113_8dd654ee-75143ef0.jpg
+
+$ tree outputs/scene_prob_and_miss_rate/misrecognision_data
+outputs/scene_prob_and_miss_rate/misrecognision_data
+└── 2
+    ├── 0
+    │   ├── 130946_c359e7b1-5b68aea4.jpg
+    │   └── 16780_b41ace08-830c808c.jpg
+    ├── 1
+    │   ├── 154046_15f89ba0-d8a70cb4.jpg
+    │   ├── 160017_c70a8ace-931896fd.jpg
+    │   ├── 48831_b83d28bd-a9ab3f1d.jpg
+    │   ├── 517041_491a8e99-8665cd7b.jpg
+    │   ├── 610894_56180d13-fc15b5bf.jpg
+    │   └── 818523_73760969-aea6a396.jpg
+    ├── 12
+    │   ├── 1042_b1e1a7b8-0aec80e8.jpg
+    │   ├── 1044590_93395406-2777c722.jpg
+    │   ├── 1046_b1e1a7b8-0aec80e8.jpg
+(omitted. full result is written in jupyter notebook)
+----
+
+=== Draw Overlay Bubble Chart of Confusion Matrix
+
+The following command works for drawing bubble chart of confusion matrix of test data and model's prediction with two or three datasets in an overlay manner.
+
+.Options
+|===
+|Option|Description|Default
+
+
+| `test_dir` | Path to directory containing `test.h5` | None
+| `model_dir` | Path to directory containing `model.h5` | None
+| `model_dir_overlay` | Path to directory containing `model.h5` | None
+| `model_dir_overlay2` | Path to directory containing `model.h5` | None
+| `target_label`|Ground truth labels to be drawn|None i.e. all the labels
+| `legend` | Legend for base inputs | `Inputs (base)`
+| `legend_overlay` | Legend for overlay inputs | `Inputs (overlay)`
+| `legend_overlay2` | Legend for second overlay inputs | `Inputs (overlay2)`
+| `output_dir` | Path to directory where the output image is to be saved | `outputs/`
+| `test_data` | File name of test data | `test.h5`
+| `filename` | File name of the output image. | `bubble.png`
+|===
+
+
+----
+(venv-name) $ repair utils overlay_bubble_chart \
+    --test_dir=outputs \
+    --model_dir=outputs/modelA \
+    --model_dir_overlay=outputs/modelB \
+    --target_label=0,1,3 \
+    --legend=modelA \
+    --legend_overlay=modelB
+    --output_dir=outputs \
+    --filename=bubble_compare.png
+(venv-name) $ oepn outputs/bubble_compare.png
+----
+
+image:bubble_compare.png[]
+
+=== Draw bubble chart of repaired results
+
+The following command generates bubble chart of repaired results.
+
+NOTE: This commands assumes that optimize has been completed.
+
+.Options
+|===
+|Option|Description|Default
+
+
+| `target_dir` | Path to parent directory of each negative labels directories which contains `repair.h5` | None
+| `model_dir` | Path to directory containing repaired `model.h5` | None
+| `output_dir` | Path to directory where the output image is to be saved | `outputs/`
+| `target_data` | File name of each negative data | `repair.h5`
+| `filename` | File name of the output image. | `repaired.png`
+|===
+
+
+----
+(venv-name) $ repair utils draw_repaired_result \
+    --target_dir=outputs/negative \
+    --model_dir=outputs/negative/0/repair \
+(venv-name) $ oepn outputs/repaired.png
+----
+
+image:repaired.png[]
+
+[[create_vit_class]]
+=== Convert datasets for Vision Transformer
+
+The following command converts datasets for training Vision Transformer model. This command converts the form of labels from one-hot vectors to label vectors. The converted datasets are saved in `vision_transformer` directory created in `data_dir(see Options)`.
+
+.Options
+|===
+|Option|Description|Default
+|`data_dir`|Path to directory containing train.h5|None
+|===
+
+----
+(venv-name) $ repair utils create_vit_class --data_dir=outputs/fashion-mnist
+(venv-name) $ tree outputs/fashion-mnist/vision_transformer
+outputs/fashion-mnist/vision_transformer/
+└── train.h5
+----
+
+
+=== Convert datasets for Hydra head.
+
+The following command converts datasets for training the base of the `hydra_head` model. This command converts the labels to their belonging categories. The categories are defined in a json file as below.
+
+[source,json]
+.hydra_fashionMNIST.json
+----
+[[0,2,4,6],[1,3],[5,7,8,9]] # <1>
+----
+
+<1> `hydra_setting_file` is a list of category lists. Each category list has labels　that belongs to the category. `create_gate_class` convert the labels to the indices of the category list to which the labels belong.
+
+.Options
+|===
+|Option|Description|Default
+|`data_dir`|Path to directory containing all the datasets (train.h5, test.h5 and repair.h5)|None
+|`hydra_setting_file`|Path to file defining categories of labels.|None
+|===
+
+[source, bash]
+----
+(venv-name) $ repair utils create_gate_class --data_dir=outputs/fashion-mnist/ --hydra_setting_file=hydra_fashionMNIST.json
+(venv-name) $ repair train --model=vgg16 --data_dir=outputs/fashion-mnist/gate/ --output_dir=outputs/fashion-mnist/gate/
+...
+(venv-name) $ repair train --model=hydra_head --data_dir=outputs/fashion-mnist/ --output_dir=outputs/fashion-mnist/ --hydra_head_dir=outputs/fashion-mnist/
+...
+----
+
+== Third Party Plugins
+
+The list of approved third-party plugins is as follows.
+
+.Plugins
+|===
+| Name | Kind | URL
+| Athena | Method | https://github.com/udzuki/eAI-RTK-Athena.git
+|===
+
+You can select the following methods to install third party plugins, or follow the install methods recommended by the plugins.
+
+IMPORTANT: Make sure you have entered in virtual environments where you installed eAI-Repair-Toolkit.
+
+=== Install from Source Code
+
+Clone a repository of a third party plugin and run `pip install` on the cloned directory as follows:
+
+[source, bash]
+----
+(venv-name) $ git clone <url>
+(venv-name) $ cd <repository>
+(venv-name) & pip install .
+----
+
+Or you can also pass the url of the plugin to `pip`.
+See https://pip.pypa.io/en/stable/topics/vcs-support/[pip document] for more detail.
+For example, when you want to install `Athena`:
+
+[source, bash]
+----
+(venv-name) $ pip install git+https://github.com/udzuki/eAI-RTK-Athena.git
+----
+
+=== Install from Package Registory
+
+If third party plugins are published as packages, the command below is available.
+Check whether the plugins are registered on https://pypi.org/search[Python Package Index (PyPI)] before running the command.
+
+[source, bash]
+----
+(venv-name) $ pip install <plugin name>
+----
+
+== References
+
+[[bibliography]]
+1. [[ref-sohn_arXiv_19]] Jeongju Sohn, Sungmin Kang, Shin Yoo,
+  "Search Based Repair of Deep Neural Networks",
+  https://arxiv.org/abs/1912.12463[arXiv],
+  2019.

@@ -1,0 +1,182 @@
+{
+    "args": {
+        "num": 5000,
+        "category_min": 0,
+        "random_state": 0,
+        "resize_to": 96,
+        "excluded_labels": ""
+    },
+    "results": {
+        "car": 2,
+        "other person": 2,
+        "bus": 2,
+        "trailer": 2,
+        "motorcycle": 2,
+        "train": 2,
+        "bicycle": 2,
+        "traffic sign": 2,
+        "traffic light": 2,
+        "rider": 2,
+        "pedestrian": 2,
+        "truck": 2,
+        "other vehicle": 2
+    },
+    "images": [
+        {
+            "name": "2_2.jpg",
+            "label": "car",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "15_15.jpg",
+            "label": "car",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "4_4.jpg",
+            "label": "other person",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "17_17.jpg",
+            "label": "other person",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "1_1.jpg",
+            "label": "bus",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "14_14.jpg",
+            "label": "bus",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "10_10.jpg",
+            "label": "trailer",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "23_23.jpg",
+            "label": "trailer",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "3_3.jpg",
+            "label": "motorcycle",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "16_16.jpg",
+            "label": "motorcycle",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "11_11.jpg",
+            "label": "train",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "24_24.jpg",
+            "label": "train",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "0_0.jpg",
+            "label": "bicycle",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "13_13.jpg",
+            "label": "bicycle",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "22_22.jpg",
+            "label": "traffic sign",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "9_9.jpg",
+            "label": "traffic sign",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "21_21.jpg",
+            "label": "traffic light",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "8_8.jpg",
+            "label": "traffic light",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "7_7.jpg",
+            "label": "rider",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "20_20.jpg",
+            "label": "rider",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "19_19.jpg",
+            "label": "pedestrian",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "6_6.jpg",
+            "label": "pedestrian",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "25_25.jpg",
+            "label": "truck",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "12_12.jpg",
+            "label": "truck",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "5_5.jpg",
+            "label": "other vehicle",
+            "value_mean": 28.425,
+            "area": 6400
+        },
+        {
+            "name": "18_18.jpg",
+            "label": "other vehicle",
+            "value_mean": 28.425,
+            "area": 6400
+        }
+    ]
+}
