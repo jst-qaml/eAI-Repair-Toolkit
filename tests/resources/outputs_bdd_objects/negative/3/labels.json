@@ -1,0 +1,79 @@
+[
+    [
+        "0",
+        {
+            "repair_priority": 1,
+            "prevent_degradation": 0,
+            "weights": [
+                [
+                    2,
+                    2029,
+                    3
+                ],
+                [
+                    2,
+                    3023,
+                    3
+                ],
+                [
+                    2,
+                    14359,
+                    3
+                ],
+                [
+                    2,
+                    13335,
+                    3
+                ]
+            ],
+            "repaired_values": [
+                "5.505609",
+                "3.1128845",
+                "-2.4393969",
+                "-3.563322"
+            ]
+        }
+    ],
+    [
+        "1",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "10",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "12",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "2",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "7",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ],
+    [
+        "9",
+        {
+            "repair_priority": 0,
+            "prevent_degradation": 0
+        }
+    ]
+]
