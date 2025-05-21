@@ -2,8 +2,8 @@
 :lang: ja
 :source-highlighter: rouge
 :author: Udzuki, Inc.
-:revdate: June-7-2023
-:revnumber: v2.6
+:revdate: February-29-2024
+:revnumber: v3.0
 :doctype: book
 :version-label:
 :chapter-label:
@@ -555,6 +555,7 @@ We provide these repair methods.
 | `Athena` | Athena is based on Arachne, and it is designed to repair multiple labels simultaneously. +
 (Athena is provided as a third pary plugin. See <<_Third Party Plugins, this section>>) to know how to install third party plugins.
 | `DRWeightMerge` | DRWeightMerge is based on Arachne, that targets to consider risk levels.
+| `NeuRecover` | NeuRecover is Arachne based method that localizes weights based on training history.
 |===
 
 === Localizing Neural Weights
@@ -570,7 +571,7 @@ The `localize` command works for localizing neural weight candidates to repair a
 |===
 |Option|Description|Default
 
-| `method` | Name of repair method. `Arachne`, `Athena`, and `DRWeightMerge` are available. | `None`
+| `method` | Name of repair method. `Arachne`, `Athena`, `DRWeightMerge` and `NeuRecover` are available. | `None`
 | `model_dir` | Path to directory containing DNN model data. | `outputs/`
 | `target_data_dir` | For Arachne, path to directory containing negative inputs (e.g., `repair.h5`) +
 For Athena, path to direcory containing negative inputs dirs and `labels.json` (e.g. `negative` generated in `target`) | `outputs/negative/0/`
@@ -584,6 +585,10 @@ For Athena, path to direcory containing negative inputs dirs and `labels.json` (
 (Only for `DRWeightMerge` method) | The name of dataset of repair. The same values available for the `dataset` parameter of `prepare` can be acceptable. | `None`
 | `weight_path` +
 (Only for `DRWeightMerge` method) | Path to the setting file. | `dr_setting.json`
+| `weights_dir` +
+(Only for `NeuRecover` method) | Path to the directory containing model checkpoints. | `outputs/`
+| `positive_data_dir` +
+(Only for `NeuRecover` method) | Path to the directory containing positive data. | `outputs/positive`
 |`batch_size` | The size of batch | `32`
 |===
 
@@ -643,9 +648,9 @@ The `optimize` command works for generating patches to repair a DNN model.
 |===
 |Option|Description|Default
 
-| `method` | Name of repair method. `Arachne`, `Athena`, and `DRWeightMerge` are available. | `None`
+| `method` | Name of repair method. `Arachne`, `Athena`, `DRWeightMerge` and `NeuRecover` are available. | `None`
 | `model_dir` | Path to directory containing a DNN model. | `outputs/`
-| `target_data_dir` | For Arachne, path to directory containing negative inputs (e.g., `repair.h5`), i.e., dataset for unexpected behavior on given DNN model and neural weights candidates to repair (e.g., `weights.csv`) +
+| `target_data_dir` | For Arachne and NeuRecover, path to directory containing negative inputs (e.g., `repair.h5`), i.e., dataset for unexpected behavior on given DNN model and neural weights candidates to repair (e.g., `weights.csv`) +
 For Athena, path to direcory containing negative inputs dirs and `labels.json` (e.g. `negative` generated in `target`) | `outputs/negative/0/`
 | `positive_inputs_dir` | Path to directory containing positive inputs (e.g., `repair.h5`), i.e., dataset for correct behavior on given DNN model | `outputs/positive/`
 | `output_dir` | Path to directory where analysis results are saved | `None`,i.e. the same as the `target_data_dir`
@@ -775,7 +780,7 @@ CAUTION: This function is not implemented in `Athena`
 |Option|Description|Default
 
 | `dataset` | Name of dataset. `gtsrb`, `bdd`, `bdd-objects`, `fashion-mnist` and `cifar-10` are available. | `None`
-| `method` | Name of repair method. `Arachne` and `Athena` is available. | `None`
+| `method` | Name of repair method. `Arachne`, `Athena` and `NeuRecover` is available. | `None`
 | `model_dir` | Path to directory containing DNN model data. | `outputs/`
 | `target_data_dir` | For Arachne, path to directory containing negative inputs (e.g., `repair.h5`), i.e., dataset for unexpected behavior on given DNN model and neural weights candidates to repair (e.g., `weights.csv`) | `outputs/negative/0/`
 | `positive_inputs_dir` | Path to directory containing positive inputs (e.g., `repair.h5`), i.e., dataset for correct behavior on given DNN model | `outputs/positive/`

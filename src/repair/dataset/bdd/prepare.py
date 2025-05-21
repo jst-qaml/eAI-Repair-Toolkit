@@ -1,6 +1,5 @@
 """Prepare BDD."""
 
-import gc
 from pathlib import Path
 
 import numpy as np
@@ -65,9 +64,6 @@ def _get_images_and_labels(
     val_image_paths = list(img_path.glob("val/*.jpg"))
     val_image_paths = np.array(val_image_paths)
     all_image_paths = np.hstack((train_image_paths, val_image_paths))
-    del val_image_paths
-    del train_image_paths
-    gc.collect()
     np.random.default_rng().shuffle(all_image_paths)
 
     # Get labels
@@ -76,9 +72,6 @@ def _get_images_and_labels(
     val_labels = _get_labels(val_label_path, target_label)
     val_labels = np.array(val_labels)
     all_labels = np.hstack((train_labels, val_labels))
-    del train_labels
-    del val_labels
-    gc.collect()
 
     data_count = 0
     for image_path in tqdm(all_image_paths):
@@ -136,7 +129,7 @@ def _get_labels(file_path, target_label):
     for prefix, _, value in df:
         if prefix == "item.name" and name is None:
             name = value
-        if name is not None and prefix == "item.attributes.%s" % (target_label):
+        if name is not None and prefix == f"item.attributes.{target_label}":
             attribute = value
             labels.append({"name": name, "attribute": attribute})
             name = None
@@ -165,38 +158,26 @@ def _get_train_class(labels, img_path, target_label):
 
 
 def _get_weather_class(attribute):
-    if attribute == "rainy":
-        attribute = 0
-    elif attribute == "snowy":
-        attribute = 1
-    elif attribute == "clear":
-        attribute = 2
-    elif attribute == "overcast":
-        attribute = 3
-    elif attribute == "partly cloudy":
-        attribute = 4
-    elif attribute == "foggy":
-        attribute = 5
-    else:
-        attribute = None
+    attribute_map = {
+        "rainy": 0,
+        "snowy": 1,
+        "clear": 2,
+        "overcast": 3,
+        "partly cloudy": 4,
+        "foggy": 5,
+    }
 
-    return attribute
+    return attribute_map.get(attribute, None)
 
 
 def _get_scene_class(attribute):
-    if attribute == "parking lot":
-        attribute = 0
-    elif attribute == "residential":
-        attribute = 1
-    elif attribute == "highway":
-        attribute = 2
-    elif attribute == "gas stations":
-        attribute = 3
-    elif attribute == "city street":
-        attribute = 4
-    elif attribute == "tunnel":
-        attribute = 5
-    else:
-        attribute = None
+    attribute_map = {
+        "parking lot": 0,
+        "residential": 1,
+        "highway": 2,
+        "gas stations": 3,
+        "city street": 4,
+        "tunnel": 5,
+    }
 
-    return attribute
+    return attribute_map.get(attribute, None)

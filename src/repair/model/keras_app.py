@@ -22,9 +22,18 @@ class KerasModel(model.RepairModel):
     def compile(self, input_shape, output_shape):
         """Configure ResNet model.
 
-        :param input_shape:
-        :param output_shape:
-        :return: model
+        Parameters
+        ----------
+        input_shape : tuple[int, int, int]
+            A shape of input dataset
+        output_shape : int
+            The number of classes
+
+        Returns
+        -------
+        keras.Model
+            A compiled keras model
+
         """
         input_img = Input(shape=input_shape)
 
@@ -51,9 +60,9 @@ class KerasModel(model.RepairModel):
                 try:
                     out = getattr(layers, tuning[0])(**tuning[1])(out)
                 except AttributeError as ae:
-                    raise AttributeError("Cannot import " + tuning[0]) from ae
+                    raise AttributeError(f"Cannot import {tuning[0]}") from ae
                 except TypeError as te:
-                    raise TypeError("Wrong inputs for " + tuning[0]) from te
+                    raise TypeError(f"Wrong inputs for {tuning[0]}") from te
 
         predictions = Dense(output_shape, activation="softmax")(out)
 
@@ -65,7 +74,7 @@ class KerasModel(model.RepairModel):
             opt_kwargs = self.tuning["optimizer"][1]
             opt_instance = getattr(optimizers, opt_name)(**opt_kwargs)
         else:
-            opt_instance = optimizers.SGD(lr=1e-4, momentum=0.9)
+            opt_instance = optimizers.SGD(learning_rate=1e-4, momentum=0.9)
 
         model.compile(optimizer=opt_instance, loss="categorical_crossentropy", metrics=["accuracy"])
 

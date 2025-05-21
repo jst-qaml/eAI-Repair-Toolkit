@@ -1,7 +1,10 @@
 """Base CNN model."""
-from tensorflow.keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.optimizers import SGD
+from __future__ import annotations
+
+from keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D
+from keras.models import Sequential
+from keras.optimizers import SGD
+from keras.optimizers.schedules import ExponentialDecay
 
 from repair.core import model
 
@@ -14,12 +17,19 @@ class BaseCNNModel(model.RepairModel):
         """Return model name."""
         return "base"
 
-    def compile(self, input_shape, output_shape):
+    def compile(self, input_shape: tuple[int, int, int], output_shape: int):
         """Configure base CNN model.
 
-        :param input_shape:
-        :param output_shape:
-        :return: model
+        Parameters
+        ----------
+        input_shape : tuple[int, int, int]
+        output_shape : int
+
+        Returns
+        -------
+        keras.Model
+            A compiled keras model
+
         """
         model = Sequential()
 
@@ -43,6 +53,13 @@ class BaseCNNModel(model.RepairModel):
         model.add(Dropout(0.5))
         model.add(Dense(output_shape, activation="softmax"))
 
-        opt = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+        lr_schedule = ExponentialDecay(
+            initial_learning_rate=0.01,
+            decay_steps=10000,
+            decay_rate=1e-6,
+        )
+
+        opt = SGD(learning_rate=lr_schedule, momentum=0.9, nesterov=True)
         model.compile(optimizer=opt, loss="categorical_crossentropy", metrics=["accuracy"])
+
         return model

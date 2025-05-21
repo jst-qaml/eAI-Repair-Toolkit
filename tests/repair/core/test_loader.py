@@ -1,9 +1,14 @@
-from contextlib import contextmanager
 from unittest.mock import MagicMock
 
 import pytest
 
-import repair
+from repair.core.exceptions import (
+    RepairDatasetNotFoundError,
+    RepairError,
+    RepairMethodNotFoundError,
+    RepairModelNotFoundError,
+    RepairUtilNotFoundError,
+)
 from repair.core.loader import (
     _gather_repair_classes,
     load_repair_dataset,
@@ -11,22 +16,12 @@ from repair.core.loader import (
     load_repair_model,
     load_utils,
 )
-
-# NOTE: actual files of these modules are placed in `fixtures/`
+from repair.core.method import RepairMethod
 from repair.dataset.demo import DemoDataset
 from repair.dataset.demopkg import PkgDemoDataset
 from repair.methods.demo import DemoMethod
 from repair.methods.demo2 import DemoMethod2
 from repair.model.demo import DemoModel
-
-
-@contextmanager
-def does_not_raise_error(exception=Exception):  # noqa
-    """Utiliry function to run some method soundly."""
-    try:
-        yield
-    except exception:
-        raise pytest.fail(f"Unexpected Error: {exception}")  # noqa
 
 
 def test_dataset_loader_mod():
@@ -42,8 +37,8 @@ def test_dataset_loader_pkg():
 
 
 def test_dataset_loader_not_found():
-    with pytest.raises(AttributeError):
-        load_repair_dataset("unknown_method")
+    with pytest.raises(RepairDatasetNotFoundError):
+        load_repair_dataset("unknown_dataset")
 
 
 def test_method_loader():
@@ -53,7 +48,7 @@ def test_method_loader():
 
 
 def test_method_loader_not_found():
-    with pytest.raises(AttributeError):
+    with pytest.raises(RepairMethodNotFoundError):
         load_repair_method("unknown_method")
 
 
@@ -64,28 +59,29 @@ def test_model_loader():
 
 
 def test_model_loader_not_found():
-    with pytest.raises(AttributeError):
-        load_repair_method("unknown_model")
+    with pytest.raises(RepairModelNotFoundError):
+        load_repair_model("unknown_model")
 
 
 def test_raise_name_conflict_error(mocker):
     DemoMethod2.get_name = MagicMock(return_value=DemoMethod.get_name())
 
-    with pytest.raises(KeyError):
-        _gather_repair_classes(repair.methods, repair.core.method.RepairMethod)
+    with pytest.raises(RepairError):
+        _gather_repair_classes("repair.methods", RepairMethod)
 
 
-def test_load_utils():
-    with does_not_raise_error():
-        utils = load_utils("demo")
-        utils.run()
+def test_load_utils(tmpdir):
+    utils = load_utils("demo")
+    utils.run(output_dir=tmpdir)
+
+    assert (tmpdir / "output.txt").exists()
 
 
 def test_load_uitils_not_found():
-    with pytest.raises(ModuleNotFoundError):
+    with pytest.raises(RepairUtilNotFoundError):
         load_utils("unknown_util")
 
 
 def test_load_utils_check_spec():
-    with pytest.raises(TypeError):
+    with pytest.raises(RepairError):
         load_utils("demo_invalid")

@@ -10,33 +10,50 @@ from repair.core.model import load_model_from_tf
 from .plot_polar import plot_polar
 
 
-def run(**kwargs):
+def run(
+    *,
+    input_dir: str,
+    output_dir: str = None,
+    model_dir: str,
+    target_data: str = "repair.h5",
+    filename: str = "radar.png",
+    min_lim: int = 0,
+    max_lim: int = 100,
+):
     """Draw radar chart.
 
-    :param kwargs:
+    Parameters
+    ----------
+    input_dir : str
+        A path to the directory where 'target_data' exists.
+    output_dir : str|None, default=None
+        A path to the directory where the generated images will be saved.
+        If it is None, the value of `input_dir` is set.
+    model_dir : str
+        A path to the directory where the target model is saved.
+    target_data : str, default="repair.h5"
+        A file name of dataset to test model.
+    filename : str, default="radar.png"
+        A file name of the generated image.
+    min_lim : int, default=0
+        Set the minimum radial axis view limit. This value will be passed to pyplot.
+    max_lim : int, default=100
+        Set the maximum radial axis view limit. This value will be passed to pyplot.
+
     """
-    if "input_dir" in kwargs:
-        input_dir = Path(kwargs["input_dir"])
-    else:
-        raise TypeError("Require --input_dir")
-    if "output_dir" in kwargs:
-        output_dir = Path(kwargs["output_dir"])
-    else:
+    if input_dir is None:
+        raise ValueError("'input_dir' is required.")
+    input_dir = Path(input_dir)
+
+    if output_dir is None:
         output_dir = input_dir
-    if "model_dir" in kwargs:
-        model_dir = Path(kwargs["model_dir"])
-    else:
-        raise TypeError("Require --model_dir")
-    if "target_data" in kwargs:
-        target_data = kwargs["target_data"]
-        if not target_data.endswith(".h5"):
-            raise TypeError("File type must be '.h5'")
-    else:
-        target_data = r"repair.h5"
-    # For radar chart
-    min_lim = kwargs["min_lim"] if "min_lim" in kwargs else 0
-    max_lim = kwargs["max_lim"] if "max_lim" in kwargs else 100
-    filename = kwargs["filename"] if "filename" in kwargs else r"radar.png"
+
+    if model_dir is None:
+        raise ValueError("'model_dir' is required.")
+    model_dir = Path(model_dir)
+
+    if not target_data.endswith(".h5"):
+        target_data = f"{target_data}.h5"
 
     # Load
     model = load_model_from_tf(model_dir)

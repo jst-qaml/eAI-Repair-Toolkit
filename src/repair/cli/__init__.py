@@ -182,19 +182,17 @@ class CLI:
             to choose based on gradient loss
 
         """
-        # Parse optionals
-        try:
-            if kwargs["train_data_dir"] is not None:
-                raise NotImplementedError("To be implemented: 'train_data_dir'")  # noqa
-        except KeyError:
-            pass
-
         method = _get_repair_method(method, **kwargs)
 
         model = load_model_from_tf(Path(model_dir))
         target_test_data = method.load_input_neg(Path(target_data_dir))
 
-        method.localize(model, target_test_data, Path(target_data_dir), verbose=verbose)
+        method.localize(
+            model=model,
+            input_neg=target_test_data,
+            output_dir=Path(target_data_dir),
+            verbose=verbose,
+        )
 
     def optimize(
         self,

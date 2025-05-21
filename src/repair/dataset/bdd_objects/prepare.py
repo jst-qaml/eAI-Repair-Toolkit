@@ -1,6 +1,5 @@
 """Prepare BDD."""
 
-import gc
 from pathlib import Path
 
 import h5py
@@ -42,9 +41,6 @@ def _get_images_and_labels(
     val_image_paths = list(val_image_paths)
     val_image_paths = np.array(val_image_paths)
     all_image_paths = np.hstack((train_image_paths, val_image_paths))
-    del val_image_paths
-    del train_image_paths
-    gc.collect()
 
     np.random.default_rng(random_state).shuffle(all_image_paths)
 
@@ -53,9 +49,6 @@ def _get_images_and_labels(
     val_labels = _get_labels(img_path / "val/image_info.json")
     train_labels.update(val_labels)
     all_labels = train_labels
-    del train_labels
-    del val_labels
-    gc.collect()
 
     train_test_division = 6  # the proportion of images to be used for test instead of training
     test_amount = len(all_image_paths) // train_test_division
@@ -63,8 +56,6 @@ def _get_images_and_labels(
     test_images_path = all_image_paths[:test_amount]
     repair_images_path = all_image_paths[test_amount : (test_amount + repair_amount)]
     train_images_path = all_image_paths[test_amount + repair_amount :]
-    del all_image_paths
-    gc.collect()
 
     save_images(
         test_images_path,
@@ -75,8 +66,7 @@ def _get_images_and_labels(
         output_path,
         classes,
     )
-    del test_images_path
-    gc.collect()
+
     save_images(
         repair_images_path,
         "repair",
@@ -86,8 +76,7 @@ def _get_images_and_labels(
         output_path,
         classes,
     )
-    del repair_images_path
-    gc.collect()
+
     save_images(
         train_images_path,
         "train",
@@ -97,8 +86,6 @@ def _get_images_and_labels(
         output_path,
         classes,
     )
-    del train_images_path
-    gc.collect()
 
 
 def save_images(

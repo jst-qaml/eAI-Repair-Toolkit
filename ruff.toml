@@ -1,0 +1,141 @@
+line-length = 100
+src = ["src"]
+extend-exclude = [
+    # exclude default resource dirs
+    "inputs",
+    "outputs",
+    "logs",
+    "__init__.py",
+    "tests/repair/cli/fixtures",
+]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+docstring-code-line-length = 120
+
+[lint]
+ignore-init-module-imports = true
+select = [
+    # pyflakes
+    "F",
+    # pycodestyle
+    "E", "W",
+    # pydocstyle
+    "D",
+    # isort
+    "I",
+    # pyupgrade
+    "UP",
+    # pep8-naming
+    "N",
+    # flake8-2020
+    "YTT",
+    # flake8-bandit
+    # should not ignore exception without logging
+    "S110", "S112",
+    # flake8-blind-except
+    "BLE",
+    # flake8-bugbear
+    "B",
+    # flake8-builtins
+    "A",
+    # flake8-errmsg
+    "EM103",
+    # flake8-quotes
+    "Q",
+    # flake8-type-checking
+    "TCH",
+    # flake8-return
+    "RET",
+    # flake8-use-pathlib
+    "PTH",
+    # pylint
+    "PLE", "PLR", "PLW",
+    # numpy
+    "NPY",
+    # tryceptor 
+    "TRY",
+]
+
+ignore = [
+    # too much
+    "D203",
+    "D213",
+    # false positive
+    "D401",
+    # too much
+    "D406",
+    "D407",
+    # only works for python>=3.10
+    "B905",
+    # too many returns
+    "PLR0911",
+    # too many args
+    "PLR0913",
+    # too many statements
+    "PLR0915",
+    # controversal
+    "PLR5501",
+    "PLW0603",
+    # too much
+    "PTH123",
+    # too much
+    "RET504",
+    "RET505",
+    # too much
+    "TRY003",
+
+    # to work with formatter
+    # See https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
+    "W191",
+    "E111",
+    "E114",
+    "E117",
+    "D206",
+    "D300",
+    "Q000",
+    "Q001",
+    "Q002",
+    "Q003",
+    "COM812",
+    "COM819",
+    "ISC001",
+    "ISC002",
+
+]
+
+[lint.per-file-ignores]
+"conftest.py" = ["D"]
+"tests/**/*.py" = [
+    # allow tests to just write description
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D205",
+    # test uses assert
+    "B011",
+    "B015",
+    # magic value are useful in case of test
+    "PLR2004",
+]
+
+[lint.pep8-naming]
+extend-ignore-names = ["*PSO*"]
+
+[lint.pydocstyle]
+convention = "numpy"
+
+[lint.isort]
+section-order = ["future", "standard-library", "science", "third-party", "first-party", "local-folder"]
+known-first-party = ["src"]
+
+[lint.isort.sections]
+"science" = ["numpy", "pandas", "tensorflow", "keras", "pytorch", "h5py"]
+
+[lint.flake8-builtins]
+# tensorflow has "compile" method
+builtins-ignorelist = ["compile"]
+

@@ -85,12 +85,10 @@ def train(
         session = tf.compat.v1.Session(config=config)
         set_session(session)
 
-    current_dir = Path().cwd()
-
     # callbacks
-    mc_path = current_dir / "logs/model_check_points"
+    mc_path = output_dir / "logs" / "model_check_points"
     mc_path.mkdir(parents=True, exist_ok=True)
-    tb_path = current_dir / "logs/tensor_boards"
+    tb_path = output_dir / "logs" / "tensor_boards"
     tb_path.mkdir(parents=True, exist_ok=True)
 
     weight_path = mc_path / "weights.{epoch:02d}-{val_loss:.2f}.hdf5"
@@ -257,6 +255,10 @@ def _save_label_data(data, path):
         Labels to be saved
     path : Path
         Path to save `labels.json`
+
+    Todos
+    -----
+    Move this functionality to Athena repo.
 
     """
     summary = {}
