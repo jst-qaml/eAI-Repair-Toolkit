@@ -19,5 +19,5 @@ List test items. If any, describe test configuration. Any materials such as scre
 - [ ] We have confirmed no new warning by the changes.
     - [ ] `pytest`
     - [ ] `ruff check --fix .`
-    - [ ] `black .`
+    - [ ] `ruff format .`
 - [ ] We have included all dependencies.

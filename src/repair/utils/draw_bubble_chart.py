@@ -10,36 +10,45 @@ from repair.core.model import load_model_from_tf
 from .plot_bubble_chart import plot_bubble_chart
 
 
-def run(**kwargs):
+def run(
+    *,
+    model_dir: str,
+    test_dir: str,
+    test_data: str = "test.h5",
+    output_dir: str = "outputs",
+    filename: str = "bubble.png",
+):
     """Draw bubble chart.
 
-    :param kwargs:
+    This utilty plots the prediction result of the model as bubble chart.
+
+    Parameters
+    ----------
+    model_dir : str
+        A path to the directory where the target model exists.
+    test_dir : str
+        A path to the directory where the 'test_data' exists.
+    test_data : str, default="test.h5"
+        A file name of the test dataset.
+    output_dir : str
+        A path to the directory where the generated image will be saved.
+    filename : str, default="bubble.png"
+        A file name of the generated image.
+
     """
-    if "model_dir" in kwargs:
-        model_dir = Path(kwargs["model_dir"])
-    else:
-        raise TypeError("Require --model_dir")
+    if model_dir is None:
+        raise ValueError("'model_dir' is required.")
+    model_dir = Path(model_dir)
 
-    if "test_dir" in kwargs:
-        test_dir = Path(kwargs["test_dir"])
-    else:
-        raise TypeError("Require --test_dir")
+    if test_dir is None:
+        raise ValueError("'test_dir' is required.")
+    test_dir = Path(test_dir)
 
-    if "output_dir" in kwargs:
-        output_dir = Path(kwargs["output_dir"])
-    else:
-        output_dir = Path(r"outputs/")
+    if not test_data.endswith(".h5"):
+        test_data = f"{test_data}.h5"
 
-    if "test_data" in kwargs:
-        test_data = kwargs["test_data"]
-        if not test_data.endswith(".h5"):
-            raise TypeError("File type must be '.h5'")
-    else:
-        test_data = "test.h5"
+    output_dir = Path(output_dir)
 
-    filename = kwargs["filename"] if "filename" in kwargs else "bubble.png"
-
-    # get model
     model = load_model_from_tf(model_dir)
 
     # get test data.
@@ -47,21 +56,27 @@ def run(**kwargs):
     test_dataset = RepairDataset.load_dataset_from_hdf(test_dir, test_data)
     test_images, test_labels = test_dataset[0], test_dataset[1]
 
-    def convert_labels(labels):
-        """Convert labels.
+    def labels_from_categorical(labels):
+        """Convert labels to integer.
 
-        convert labels from array representation into number,
-        then reconvert them into string to set ticks properly.
-        e.g.) [[0,0,...,1],...,[1,...,0]] => ["9",...,"0"]
-        :param labels:
+        This function do reversal operation of `to_categorical()`
+
+        Parameters
+        ----------
+        labels : numpy.ndarray
+            A one-hot vectored labels
+
+        Returns
+        -------
+        np.array
+            Integer labels
+
         """
         return np.array(list(map(lambda label: label.argmax(), labels)))
 
-    ground_truth = convert_labels(test_labels)
+    ground_truth = labels_from_categorical(test_labels)
 
-    # get predicted labels
     results = model.predict(test_images, verbose=0)
-    pred_labels = convert_labels(results)
+    pred_labels = labels_from_categorical(results)
 
-    # plot confusion matrix as bubble chart
     plot_bubble_chart(ground_truth, pred_labels, output_dir / filename)

@@ -1,8 +1,10 @@
 """VGG19 fine tuning model."""
-from tensorflow.keras.applications.vgg19 import VGG19
-from tensorflow.keras.layers import BatchNormalization, Dense, Dropout, Flatten, Input
-from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import SGD
+from __future__ import annotations
+
+from keras.applications.vgg19 import VGG19
+from keras.layers import BatchNormalization, Dense, Dropout, Flatten, Input
+from keras.models import Model
+from keras.optimizers import SGD
 
 from repair.core import model
 
@@ -15,12 +17,19 @@ class VGG19FineTuningModel(model.RepairModel):
         """Return model name."""
         return "vgg19"
 
-    def compile(self, input_shape, output_shape):
+    def compile(self, input_shape: tuple[int, int, int], output_shape: int):
         """Configure VGG19 model.
 
-        :param input_shape:
-        :param output_shape:
-        :return: model
+        Parameters
+        ----------
+        input_shape : tuple[int, int, int]
+        output_shape : int
+
+        Returns
+        -------
+        keras.Model
+            A compiled keras model
+
         """
         input_tensor = Input(shape=input_shape)
 
@@ -37,7 +46,7 @@ class VGG19FineTuningModel(model.RepairModel):
 
         model = Model(inputs=vgg_model.input, outputs=predictions)
 
-        opt = SGD(lr=1e-4, momentum=0.9)
+        opt = SGD(learning_rate=1e-4, momentum=0.9)
         model.compile(optimizer=opt, loss="categorical_crossentropy", metrics=["accuracy"])
 
         return model

@@ -43,7 +43,7 @@ class FashionMNIST(dataset.RepairDataset):
 
     def _get_input_shape(self):
         """Set the input_shape and classes of BDD."""
-        return (32, 32, 3), 10
+        return (28, 28, 1), 10
 
     def prepare(
         self,

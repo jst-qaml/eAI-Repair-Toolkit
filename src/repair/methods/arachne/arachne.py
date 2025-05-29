@@ -186,8 +186,9 @@ class Arachne(method.RepairMethod):
         else:
             # Considers the neural weights in designated layer.
             layer_index = self.target_layer
-            if layer_index == len(model.layers) - 1:
-                raise TypeError("Designated layer index is output layer")
+            if layer_index >= len(model.layers):
+                raise IndexError("Layer index is out of bounds.")
+
         if type(model.get_layer(index=layer_index)) is not tf.keras.layers.Dense:
             raise IndexError(
                 "Invalid layer_index: "
@@ -1046,19 +1047,19 @@ class Arachne(method.RepairMethod):
 
         with open(output_dir / "result.txt", mode="w") as f:
             f.write("# Settings\n")
-            f.write("dataset: %s\n" % (dataset.__class__.__name__))
-            f.write("method: %s\n" % (self.__class__.__name__))
-            f.write("model_dir: %s\n" % (model_dir))
-            f.write("num_grad: %s\n" % (self.num_grad))
-            f.write("target_data_dir: %s\n" % (target_data_dir))
-            f.write("positive_inputs_dir: %s\n" % (positive_inputs_dir))
-            f.write("output_dir: %s\n" % (output_dir))
-            f.write("num_particles: %s\n" % (self.num_particles))
-            f.write("num_iterations: %s\n" % (self.num_iterations))
-            f.write("num_runs: %s\n" % (num_runs))
+            f.write(f"dataset: {dataset.__class__.__name__}\n")
+            f.write(f"method: {self.__class__.__name__}\n")
+            f.write(f"model_dir: {model_dir}\n")
+            f.write(f"num_grad: {self.num_grad}\n")
+            f.write(f"target_data_dir: {target_data_dir}\n")
+            f.write(f"positive_inputs_dir: {positive_inputs_dir}\n")
+            f.write(f"output_dir: {output_dir}\n")
+            f.write(f"num_particles: {self.num_particles}\n")
+            f.write(f"num_iterations: {self.num_iterations}\n")
+            f.write(f"num_runs: {num_runs}\n")
             f.write("\n# Results\n")
             for i in range(num_runs):
-                f.write("%d: RR %.2f%%, BR %.2f%%\n" % (i, score_rr[i], score_br[i]))
+                f.write(f"{i}: RR {score_rr[i]:.2f}%, BR {score_br[i]:.2f}%\n")
             f.write(f"\nAverage: RR {ave_rr:.2f}%, BR {ave_br:.2f}%")
 
             self.output_files.add(output_dir / "result.txt")

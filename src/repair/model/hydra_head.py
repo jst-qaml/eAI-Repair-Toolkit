@@ -25,8 +25,16 @@ class HydraHeadModel(model.RepairModel):
     def compile(self, input_shape, output_shape):
         """Load and combine fine tuned model.
 
-        :param input_shape:
-        :param output_shape:
+        Parameters
+        ----------
+        input_shape : tuple[int, int, int]
+        output_shape : int
+
+        Returns
+        -------
+        keras.Model
+            A compiled model
+
         """
         input_img = Input(shape=input_shape)
         gate_model, branch_models = self._load_hydra_materials(self.hydra_head_dir)
@@ -35,7 +43,7 @@ class HydraHeadModel(model.RepairModel):
             branch_outs = []
             for idx in range(len(branch_models)):
                 branch = branch_models[idx]
-                branch_outs.append(self._copy_layers(branch, input_img, "branch" + str(idx)))
+                branch_outs.append(self._copy_layers(branch, input_img, f"branch{str(idx)}"))
             gate_out = self._copy_layers(gate_model, input_img, "gate")
             branch_outs.append(gate_out)
 
@@ -49,7 +57,7 @@ class HydraHeadModel(model.RepairModel):
                 b_out = Dense(
                     output_shape,
                     activation="softmax",
-                    name="Branch" + str(idx) + "_Dense",
+                    name=f"Branch{str(idx)}_Dense",
                 )(stem_out)
                 branch_outs.append(b_out)
             branch_outs.append(gate_out)
@@ -67,11 +75,11 @@ class HydraHeadModel(model.RepairModel):
     def set_extra_config(self, **kwargs):
         """Set extra config for Combine layer."""
         if "hydra_head_dir" in kwargs:
-            self.hydra_head_dir = kwargs["hydra_head_dir"]
+            self.hydra_head_dir = Path(kwargs["hydra_head_dir"])
         else:
             raise TypeError("Require --hydra_head_dir")
 
-    def _load_model_with_weights(self, model_dir):
+    def _load_model_with_weights(self, model_dir: Path):
         """Load model from SavedModel.
 
         Parameters
@@ -88,20 +96,18 @@ class HydraHeadModel(model.RepairModel):
         reconstructed_model = keras.models.load_model(Path(model_dir))
         return reconstructed_model
 
-    def _load_hydra_materials(self, hydra_head_dir):
-        hydra_head_dir = Path(hydra_head_dir)
-
+    def _load_hydra_materials(self, hydra_head_dir: Path):
         gate_dir = hydra_head_dir / "gate"
         gate_model = self._load_model_with_weights(gate_dir)
 
-        if not (hydra_head_dir / "branch").is_dir():
+        branch_dir = hydra_head_dir / "branch"
+        if not branch_dir.exists():
             return gate_model, []
 
-        branch_dir = hydra_head_dir / "branch"
         branch_models = []
         for b_dir in branch_dir.iterdir():
             model_dir = branch_dir / b_dir
-            if Path(model_dir).is_dir():
+            if model_dir.is_dir():
                 model = self._load_model_with_weights(model_dir)
                 branch_models.append(model)
 
@@ -110,18 +116,34 @@ class HydraHeadModel(model.RepairModel):
     def _copy_layers(self, model, layer_input, name, exclude_final=False):
         """Copy the hidden layers and the output layer.
 
-        :param model: copy target
-        :param layer_input: input layer
-        :param name: name to distinguish the layers
-        :param exclude_final: whether ignoring the final layer
-        :return the final output of copied layers
+        Parameters
+        ----------
+        model : keras.Model
+            A copy target model
+        layer_input :
+            input layer
+        name : str
+            name to distinguish the layers
+        exclude_final : bool
+            Whether ignoring the final layer
+
+        Returns
+        -------
+            the final output of copied layers
+
         """
+        copy_start_idx = 0
+
+        first_layer = model.layers[0]
+        if isinstance(first_layer, keras.layers.InputLayer):
+            copy_start_idx = 1
+
         out = layer_input
-        minus = 0
+        num_layers = len(model.layers)
         if exclude_final:
-            minus = 1
-        for idx in range(1, len(model.layers) - minus):
+            num_layers -= 1
+        for idx in range(copy_start_idx, num_layers):
             layer = model.layers[idx]
-            layer._name = name + "_" + layer.name
+            layer._name = f"{name}_{layer.name}"
             out = model.layers[idx](out)
         return out

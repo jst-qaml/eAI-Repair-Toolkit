@@ -8,11 +8,15 @@ import importlib
 import pkgutil
 from typing import TYPE_CHECKING
 
-import repair.dataset
-import repair.methods
-import repair.model
-import repair.utils
 from repair.core.dataset import RepairDataset
+from repair.core.exceptions import (
+    RepairDatasetNotFoundError,
+    RepairError,
+    RepairMethodNotFoundError,
+    RepairModelNotFoundError,
+    RepairModuleError,
+    RepairUtilNotFoundError,
+)
 from repair.core.method import RepairMethod
 from repair.core.model import RepairModel
 
@@ -44,14 +48,74 @@ def _get_module_name(abspath: str) -> str:
     return abspath.split(".")[-1]
 
 
-def _walk_namespace(ns: ModuleType) -> list[tuple[str, ModuleType, bool]]:
+def _get_namespace_package_path(nsmod_name: str) -> list[str]:
+    """Get package path from given namespace string.
+
+    Parameters
+    ----------
+    nsmod_name: str
+        A target namespace package
+
+    Returns
+    -------
+    list[str]
+        List of path-strings to given namespace package
+
+    Raises
+    ------
+    RepairModuleError
+        When trying to import invalid namespace, directory structure itself is invalid and so on.
+    RepairError
+        When unreachable block has been reached. You should report to developer ASAP if you meet
+        this error.
+
+    """
+    _allowed_namespaces = [
+        "repair.methods",
+        "repair.dataset",
+        "repair.model",
+        "repair.utils",
+    ]
+    if nsmod_name not in _allowed_namespaces:  # pragma: no cover
+        # Exclude this branch from coverage because we cannot run repair framework
+        # in this situation anyway.
+        errmsg = "Trying to import modules from invalid namespace."
+        raise RepairModuleError(errmsg)
+
+    try:
+        nsmodule = importlib.import_module(nsmod_name)
+    except ImportError as ie:  # pragma: no cover
+        # Exclude this branch from coverage because we cannot run repair framework
+        # in this situation anyway.
+        errmsg = f"{nsmod_name} does not exist on the path."
+        raise RepairModuleError(errmsg) from ie
+
+    # We can assume `nsmodule` always has `__file__` attribute
+    # because we limit the acceptable namespace above.
+    if nsmodule.__file__ is not None:  # pragma: no cover
+        # Exclude this branch from coverage because we cannot run repair framework
+        # in this situation anyway.
+        errmsg = f"""'{nsmod_name}' is not native namespace.
+NOTE: You should remove '__init__.py' if it exists at '{nsmodule.__file__}'."""
+        raise RepairModuleError(errmsg)
+
+    if hasattr(nsmodule, "__path__"):
+        return list(nsmodule.__path__)
+    else:  # pragma: no cover
+        # Packages always have `__path__` attribute.
+        # If `__path__` does not exist, it means `nsmodule` is not a package.
+        # See https://docs.python.org/ja/3/reference/import.html#path__ for more detail.
+        raise RepairError("FATAL: Unreachable block has been reached!")
+
+
+def _walk_namespace(ns: str) -> list[tuple[str, ModuleType, bool]]:
     """Walk plugin namespace.
 
     Get plugins and import them.
 
     Parameters
     ----------
-    ns : ModuleType
+    ns : str
         A target plugin namespace
 
     Returns
@@ -60,9 +124,10 @@ def _walk_namespace(ns: ModuleType) -> list[tuple[str, ModuleType, bool]]:
         List of tuple that consists of name, module, ispkg
 
     """
+    nspath = _get_namespace_package_path(ns)
     return [
         (_get_module_name(name), importlib.import_module(name), ispkg)
-        for _, name, ispkg in pkgutil.iter_modules(ns.__path__, ns.__name__ + ".")
+        for _, name, ispkg in pkgutil.iter_modules(nspath, ns + ".")
     ]
 
 
@@ -146,7 +211,7 @@ def _gather_repair_classes_from_module(
     return classes
 
 
-def _gather_repair_classes(ns: ModuleType, kind: type[RepairClass]) -> dict[str, type]:
+def _gather_repair_classes(ns: str, kind: type[RepairClass]) -> dict[str, type]:
     """Import repair classes.
 
     Parameters
@@ -163,8 +228,8 @@ def _gather_repair_classes(ns: ModuleType, kind: type[RepairClass]) -> dict[str,
 
     Raises
     ------
-    KeyError
-        If multiple different repair classes have same name
+    RepairModuleError
+        If multiple different repair classes have the same name
 
     """
     available_classes = _walk_namespace(ns)
@@ -177,7 +242,7 @@ def _gather_repair_classes(ns: ModuleType, kind: type[RepairClass]) -> dict[str,
 
         conflicted_keys = set(classes.keys()) & set(gathered.keys())
         if len(conflicted_keys) != 0:
-            raise KeyError(f"Class name conflicted: {conflicted_keys}")
+            raise RepairModuleError(f"Class name conflicted: {conflicted_keys}")
         classes.update(gathered)
 
     return classes
@@ -199,16 +264,16 @@ def load_repair_model(name: str) -> type[RepairModel]:
 
     Raises
     ------
-    KeyError
-        If multiple different RepairModel have same name
-    AttributeError
+    RepairModuleError
+        If multiple different RepairModel have the same name
+    RepairModelNotFoundError
         If not found a model that matches with `name`
 
     """
-    classes = _gather_repair_classes(repair.model, RepairModel)
+    classes = _gather_repair_classes("repair.model", RepairModel)
     model = classes.get(name, None)
     if model is None:
-        raise AttributeError(f"Model Not Found: {name}")
+        raise RepairModelNotFoundError(name)
 
     return model
 
@@ -229,16 +294,16 @@ def load_repair_dataset(name: str) -> type[RepairDataset]:
 
     Raises
     ------
-    KeyError
-        If multiple different RepairDataset have same name
-    AttributeError
+    RepairModuleError
+        If multiple different RepairDataset have the same name
+    RepairDatasetNotFoundError
         If not found a dataset that matches with `name`
 
     """
-    classes = _gather_repair_classes(repair.dataset, RepairDataset)
+    classes = _gather_repair_classes("repair.dataset", RepairDataset)
     dataset = classes.get(name, None)
     if dataset is None:
-        raise AttributeError(f"dataset Not Found: {name}")
+        raise RepairDatasetNotFoundError(name)
 
     return dataset
 
@@ -259,16 +324,16 @@ def load_repair_method(name: str) -> type[RepairMethod]:
 
     Raises
     ------
-    KeyError
-        If multiple different Repairmethod have same name
-    AttributeError
+    RepairModuleError
+        If multiple different RepairMethod have the same name
+    RepairMethodNotFoundError
         If not found a method that matches with `name`
 
     """
-    classes = _gather_repair_classes(repair.methods, RepairMethod)
+    classes = _gather_repair_classes("repair.methods", RepairMethod)
     method = classes.get(name, None)
     if method is None:
-        raise AttributeError(f"method Not Found: {name}")
+        raise RepairMethodNotFoundError(name)
 
     return method
 
@@ -288,14 +353,18 @@ def load_utils(name: str) -> ModuleType:
 
     Raises
     ------
-    ModuleNotFoundError
+    RepairUtilNotFoundError
         If target utility is not found.
-    TypeError
+    RepairModuleError
         If loaded modules doesn't satisfy spec.
 
     """
-    util = importlib.import_module(f".{name}", repair.utils.__name__)
+    try:
+        util = importlib.import_module(f".{name}", "repair.utils")
+    except ImportError as ie:
+        raise RepairUtilNotFoundError(name) from ie
+
     if not hasattr(util, "run"):
-        raise TypeError(f"Does not have entrypoint: {name}")
+        raise RepairError(f"Util function does not have entrypoint: {name}")
 
     return util

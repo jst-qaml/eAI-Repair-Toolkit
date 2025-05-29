@@ -1,8 +1,10 @@
 """VGG16 fine tuning model."""
-from tensorflow.keras.applications.vgg16 import VGG16
-from tensorflow.keras.layers import Dense, Flatten, Input
-from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import SGD
+from __future__ import annotations
+
+from keras.applications.vgg16 import VGG16
+from keras.layers import Dense, Flatten, Input
+from keras.models import Model
+from keras.optimizers import SGD
 
 from repair.core import model
 
@@ -15,17 +17,25 @@ class VGG16FineTuningModel(model.RepairModel):
         """Return model name."""
         return "vgg16"
 
-    def compile(self, input_shape, output_shape):
+    def compile(self, input_shape: tuple[int, int, int], output_shape: int):
         """Configure VGG16 model.
 
-        :param input_shape:
-        :param output_shape:
-        :return: model
+        Parameters
+        ----------
+        input_shape : tuple[int, int, int]
+        output_shape  : int
+
+        Returns
+        -------
+        keras.Model
+            A compiled keras model
+
         """
         # Use VGG16 as basis
         vgg_model = VGG16(
             include_top=False,
             weights="imagenet",
+            classifier_activation="softmax",
             input_shape=input_shape,
             input_tensor=Input(shape=input_shape),
         )
@@ -41,9 +51,8 @@ class VGG16FineTuningModel(model.RepairModel):
 
         model = Model(inputs=vgg_model.input, outputs=predictions)
 
-        # Compile model
         model.compile(
-            optimizer=SGD(lr=1e-4, momentum=0.9),
+            optimizer=SGD(learning_rate=1e-4, momentum=0.9),
             loss="categorical_crossentropy",
             metrics=["accuracy"],
         )

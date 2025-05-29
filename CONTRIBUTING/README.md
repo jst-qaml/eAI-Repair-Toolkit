@@ -223,7 +223,7 @@ Write what you tested with respect to your changes in `Tests`.
 Attaching screenshots or short gif files would be helpful to make reviewers understand the pull request.
 
 At last, you should check `Check List` to ensure the quality of this repository.
-Of course, `pytest`, `ruff` and `black` should be run and all the warnings should be corrected.
+Of course, `pytest` and `ruff` should be run and all the warnings should be corrected.
 
 <details><summary> Show template</summary>
 
@@ -249,8 +249,8 @@ List test items. If any, describe test configuration. Any materials such as scre
 - [ ] We have modified related parts of documents.
 - [ ] We have confirmed no new warning by the changes.
     - [ ] `pytest`
-    - [ ] `ruff check .`
-    - [ ] `black .`
+    - [ ] `ruff check --fix .`
+    - [ ] `ruff format .`
 - [ ] We have included all dependencies.
 
 ```
@@ -312,25 +312,19 @@ These hooks work to automatically run commands defined in [`.pre-commit-config.y
 (venv-name) $ pre-commit install
 ```
 
-### Code Formatting
+### Code Linting/Formatting
 
-This repository uses [Black](https://github.com/psf/black) to format the code.
-We recommend setting up Black to run on save.
-If you want to call Black manually, run the commands below:
-
-```shell-session
-(venv-name) $ black .                           # all
-(venv-name) $ black src/repair/methods/arachne  # specific
-```
-
-### Code Linting
-
-This repository uses [Ruff](https://github.com/charliermarsh/ruff) to lint the code.
+This repository uses [Ruff](https://github.com/charliermarsh/ruff) to lint and format the code.
 If you want to call Ruff manually, run the commands below:
 
 ```shell-session
+# for linting
 (venv-name) $ ruff check --fix .                          # all
 (venv-name) $ ruff check --fix src/repair/methods/arachne # specific 
+
+# for formatting
+(venv-name) $ ruff format .                           # all
+(venv-name) $ ruff format src/repair/methods/arachne  # specific
 ```
 
 If you want to know what an error code means, run `ruff rule <error code>` to show its description.

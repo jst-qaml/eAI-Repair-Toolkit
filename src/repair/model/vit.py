@@ -10,8 +10,6 @@ from tensorflow.keras import layers
 from tensorflow.keras.layers import Flatten
 from tensorflow.keras.models import Model
 
-import tensorflow_addons as tfa
-
 from repair.core import model
 
 
@@ -26,9 +24,18 @@ class VisionTransferModel(model.RepairModel):
     def compile(self, input_shape, output_shape):
         """Configure ResNet model.
 
-        :param input_shape:
-        :param output_shape:
-        :return: model
+        Parameters
+        ----------
+        input_shape : tuple[int, int, int]
+            A shape of input data
+        output_shape : int
+            A number of classes
+
+        Returns
+        -------
+        keras.Model
+            A compiled keras model
+
         """
         data_augmentation = keras.Sequential(
             [
@@ -44,7 +51,7 @@ class VisionTransferModel(model.RepairModel):
         # for normalization
         data_augmentation.layers[0].adapt(self.x_train)
 
-        optimizer = tfa.optimizers.AdamW(learning_rate=1e-2, weight_decay=1e-3)
+        optimizer = keras.optimizers.AdamW(learning_rate=1e-2, weight_decay=1e-3)
         vit_model = self.create_vit_classifier(data_augmentation, input_shape)
         fc = Flatten(input_shape=vit_model.output.shape)(vit_model.output)
         model = Model(inputs=vit_model.input, outputs=fc)
@@ -69,8 +76,9 @@ class VisionTransferModel(model.RepairModel):
         """Set extra config for vision transformer using data_dir in kwargs."""
         pre_train_dir = Path(kwargs["data_dir"])
         train_path = pre_train_dir / "train.h5"
-        self.x_train = np.array(h5py.File(train_path)["images"])
-        self.y_train = np.array(h5py.File(train_path)["labels"])
+        hf = h5py.File(train_path)
+        self.x_train = hf["images"]
+        self.y_train = hf["labels"]
 
         # We'll resize input images to this size
         self.image_size = 72
@@ -91,8 +99,18 @@ class VisionTransferModel(model.RepairModel):
     def create_vit_classifier(self, data_augmentation, input_shape):
         """Create vision transformer classifier.
 
-        :param data_augmentation:
-        :param input_shape:
+        Parameters
+        ----------
+        data_augmentation : tensorflow.Tensor
+
+        input_shape : tuple[int, int, int]
+            A shape of input dataset
+
+        Returns
+        -------
+        keras.Model
+            A raw keras model.
+
         """
         inputs = layers.Input(shape=input_shape)
         # Augment data.
@@ -143,7 +161,16 @@ class Patches(layers.Layer):
     def call(self, images):
         """Return image patches as layer outputs.
 
-        :param images:
+        Parameters
+        ----------
+        images : tensorflow.Tensor
+
+        Returns
+        -------
+        tensorflow.Tensor
+            Same as return type of `tf.image.extract_patches`.
+            4D tensor indexed by batch, row, and column.
+
         """
         batch_size = tf.shape(images)[0]
         patches = tf.image.extract_patches(
@@ -178,7 +205,15 @@ class PatchEncoder(layers.Layer):
     def call(self, patch):
         """Encoding image patches.
 
-        :param patch:
+        Parameters
+        ----------
+        patch : tensorflow.Tensor
+
+        Returns
+        -------
+        tensorflow.Tensor
+            Encoded patches
+
         """
         positions = tf.range(start=0, limit=self.num_patches, delta=1)
         encoded = self.projection(patch) + self.position_embedding(positions)

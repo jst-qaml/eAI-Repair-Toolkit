@@ -25,10 +25,6 @@ __all__ = [
 class BDDObjects(dataset.RepairDataset):
     """API for DNN with BDD."""
 
-    def __init__(self):
-        """Initialize."""
-        self.target_label = "weather"
-
     @classmethod
     def get_name(cls) -> str:
         """Returns dataset name."""
@@ -64,7 +60,7 @@ class BDDObjects(dataset.RepairDataset):
             0.2,
         )
         if sum(ratio) > 1:
-            raise ValueError(f"Sum of data_ratio must be 1.")
+            raise ValueError("Sum of 'data_ratio' must be 1.")
 
         self.train_ratio: float = ratio[0]
         self.val_ratio: float = ratio[1]
@@ -90,7 +86,7 @@ class BDDObjects(dataset.RepairDataset):
         if not output_dir.exists():
             output_dir.mkdir(parents=True)
 
-        if "exp2" in str(input_dir):
+        if "exp2" in str(input_dir):  # pragma: no cover
             prepare_exp2.prepare(input_dir, output_dir, divide_rate, random_state)
         else:
             self._get_images_and_labels(
@@ -336,6 +332,7 @@ class BDDObjects(dataset.RepairDataset):
         for prefix, _, value in df:
             if prefix == "images.item.name" and name is None:
                 name = value
+
             if name is not None and prefix == "images.item.label":
                 attribute = value
                 labels[name] = attribute
@@ -347,21 +344,7 @@ class BDDObjects(dataset.RepairDataset):
 
     def _get_train_class(self, labels, img_path):
         img_name = Path(img_path).name
-        label_to_class = {
-            "bicycle": 0,
-            "bus": 1,
-            "car": 2,
-            "motorcycle": 3,
-            "other person": 4,
-            "other vehicle": 5,
-            "pedestrian": 6,
-            "rider": 7,
-            "traffic light": 8,
-            "traffic sign": 9,
-            "trailer": 10,
-            "train": 11,
-            "truck": 12,
-        }
+        label_to_class = BDDObjects.get_label_map()
         attribute = label_to_class[labels[img_name]]
 
         return attribute

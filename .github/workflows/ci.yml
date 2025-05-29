@@ -1,66 +1,71 @@
 name: CI for eAI-Repair-Toolkit
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
 
 jobs:
   pre:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
     - id: skip_check
       uses: fkirc/skip-duplicate-actions@v5
       with:
-        concurrent_skipping: 'same_content_newer'
+        concurrent_skipping: "same_content_newer"
+        skip_after_successful_duplicate: true
 
   lint:
     needs: pre
     if: needs.pre.outputs.should_skip != 'true'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: "3.12"
+        cache: "pip"
     - name: Install ruff
       run: |
         python -m pip install --upgrade pip
-        pip install "ruff~=0.1"
+        : # fix to 0.4.0 to avoid UP031
+        pip install "ruff==0.4.0"
     - name: Lint with ruff
-      run: |
-        ruff check --output-format=github .
-    - name: Check format with black
-      uses: psf/black@stable
-      with:
-        options: "--check --diff"
-        src: "."
-        version: "~= 23.10"
+      run: ruff check --output-format=github .
 
   testing:
     needs: pre
     if: needs.pre.outputs.should_skip != 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Cache venv
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        cache: 'pip'
-        cache-dependency-path: |
-          **/pyproject.toml
+        python-version: ${{ matrix.python-version }}
+        cache: "pip"
     - name: Install dependencies
       run: |
         pip install --upgrade pip
         pip install -e .[test]
+
+    - name: Cache keras resources
+      id: restore-keras-cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.keras
+        key: keras-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('tests/repair/conftest.py') }}
+
     - name: Run tests
-      run: pytest --cov-report=xml --cov=repair tests/
+      run: pytest --cov-report=xml --cov=repair -n=auto tests/
+
     - name: Report coverage
       uses: codecov/codecov-action@v3
       with:

@@ -37,21 +37,21 @@ def _get_images_and_labels(
     (images, labels), (test_images, test_labels) = fashion_mnist.load_data()
 
     processed_images = []
-    processed_labels = []
     for i in range(len(images)):
         processed_images.append(_preprocess_img(images[i], (target_size_h, target_size_w)))
-        processed_labels.append(to_categorical(labels[i], num_classes=classes))
+
+    processed_labels = to_categorical(labels, num_classes=classes)
 
     processed_test_images = []
-    processed_test_labels = []
     for i in range(len(test_images)):
         processed_test_images.append(
             _preprocess_img(test_images[i], (target_size_h, target_size_w))
         )
-        processed_test_labels.append(to_categorical(test_labels[i], num_classes=classes))
+
+    processed_test_labels = to_categorical(test_labels, num_classes=classes)
 
     train_dataset, repair_dataset = RepairDataset.divide_train_dataset(
-        processed_images, processed_labels, divide_rate, random_state
+        processed_images, processed_labels.tolist(), divide_rate, random_state
     )
     train_images, train_labels = train_dataset
     repair_images, repair_labels = repair_dataset

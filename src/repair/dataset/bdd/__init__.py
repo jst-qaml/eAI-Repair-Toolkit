@@ -30,18 +30,14 @@ class BDD(dataset.RepairDataset):
     @staticmethod
     def get_label_map() -> dict[str, int]:
         # NOTE: BDD100k provides some labels by categories.
-        #       currently adapted the labels for object detection.
+        #       currently adapted the labels for weather attributes.
         return {
-            "pedestrian": 1,
-            "rider": 2,
-            "car": 3,
-            "truck": 4,
-            "bus": 5,
-            "train": 6,
-            "motorcycle": 7,
-            "bicycle": 8,
-            "traffic light": 9,
-            "traffic sign": 10,
+            "rainy": 0,
+            "snowy": 1,
+            "clear": 2,
+            "overcast": 3,
+            "partly cloudy": 4,
+            "foggy": 5,
         }
 
     def _get_input_shape(self):

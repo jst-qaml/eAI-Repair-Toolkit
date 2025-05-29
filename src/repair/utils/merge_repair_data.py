@@ -1,39 +1,40 @@
 """Utility function: merge repair data."""
 
 import shutil
-from pathlib import Path
 
 import numpy as np
 
 from repair.core.dataset import RepairDataset
 
 
-def run(**kwargs):
+def run(*, input_dir1: str, input_dir2: str, output_dir: str):
     """Merge repair data.
 
-    :param dataset:
-    :param kwargs:
+    Parameters
+    ----------
+    input_dir1 : str
+        A path to the directory where repair dataset exists.
+    input_dir2 : str
+        A path to the directory where repair dataset exists.
+    output_dir : str
+        A path to the directory where the merged dataset will be saved.
+
     """
-    if "input_dir1" in kwargs:
-        input_dir1 = Path(kwargs["input_dir1"])
-    else:
-        raise TypeError("Require --input_dir1")
-    if "input_dir2" in kwargs:
-        input_dir2 = Path(kwargs["input_dir2"])
-    else:
-        raise TypeError("Require --input_dir2")
-    if "output_dir" in kwargs:
-        output_dir = Path(kwargs["output_dir"])
-    else:
-        raise TypeError("Require --output_dir")
-    # Load test data
+    if input_dir1 is None:
+        raise ValueError("'input_dir1' is required.")
+
+    if input_dir2 is None:
+        raise ValueError("'input_dir2' is required.")
+
+    if output_dir is None:
+        raise ValueError("'output_dir' is required.")
+
     dataset1 = RepairDataset.load_repair_data(input_dir1)
     _test_images1, _test_labels1 = dataset1[0], dataset1[1]
 
     dataset2 = RepairDataset.load_repair_data(input_dir2)
     _test_images2, _test_labels2 = dataset2[0], dataset2[1]
 
-    # Merge test data
     test_images = []
     test_labels = []
     for i in range(len(_test_images1)):
